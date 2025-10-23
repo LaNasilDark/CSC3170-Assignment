@@ -22,4 +22,5 @@ private:
   std::function<size_t(int)> h2_func;
 
   void rehash();
+  void rehash(const std::vector<int>& keys_to_insert);
 };
