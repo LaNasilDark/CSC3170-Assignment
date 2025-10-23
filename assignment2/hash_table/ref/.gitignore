@@ -1,9 +1,0 @@
-/build/
-/CMakeFiles/
-/CMakeCache.txt
-/Makefile
-/.cache/
-/*.o
-/*.a
-*.swp
-*.out
