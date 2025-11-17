@@ -110,7 +110,7 @@ class RoommateInfo(BaseModel):
 class DormChangeRequestCreate(BaseModel):
     """创建宿舍调换申请"""
     target_dorm_id: int = Field(..., description="目标宿舍ID")
-    reason: str = Field(..., min_length=10, max_length=500, description="申请理由")
+    reason: str = Field(..., min_length=5, max_length=500, description="申请理由")
 
 
 class DormChangeRequestInfo(BaseModel):
@@ -149,7 +149,7 @@ class DormChangeRequestResponse(BaseModel):
 class MaintenanceRequestCreate(BaseModel):
     """创建维修申请"""
     issue_type: str = Field(..., description="问题类型: 水电/家具/网络/其他")
-    description: str = Field(..., min_length=5, max_length=500, description="问题描述")
+    description: str = Field(..., min_length=1, max_length=500, description="问题描述")
     priority: Optional[str] = Field("medium", description="优先级: low/medium/high/urgent")
 
 

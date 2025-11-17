@@ -14,7 +14,7 @@ print("="*80)
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '',  # 请输入你的MySQL密码
+    'password': '123456',  # 请输入你的MySQL密码
     'charset': 'utf8mb4',
     'cursorclass': pymysql.cursors.DictCursor
 }

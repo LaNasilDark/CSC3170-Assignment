@@ -4,7 +4,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from .. import schemas, auth, models
 from ..database import get_db
@@ -42,9 +42,7 @@ async def login(
     admin = auth.authenticate_admin(db, form_data.username, form_data.password)
     if admin:
         # 更新最后登录时间
-        admin.last_login = db.query(models.Administrator).filter(
-            models.Administrator.admin_id == admin.admin_id
-        ).first()
+        admin.last_login = datetime.utcnow()
         db.commit()
         
         access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
