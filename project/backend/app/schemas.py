@@ -69,15 +69,35 @@ class StudentProfile(StudentBase):
 
 
 class StudentUpdate(BaseModel):
-    """学生信息更新"""
+    """学生信息更新(学生自己用)"""
     name: Optional[str] = None
     email: Optional[EmailStr] = None
+
+
+class AdminStudentUpdate(BaseModel):
+    """管理员更新学生信息"""
+    name: Optional[str] = Field(None, min_length=2, description="姓名")
+    gender: Optional[str] = Field(None, description="性别: 男/女")
+    nationality: Optional[str] = Field(None, description="国籍")
+    college: Optional[str] = Field(None, description="学院代码")
+    enrollment_year: Optional[int] = Field(None, ge=2020, le=2030, description="入学年份")
+    email: Optional[EmailStr] = Field(None, description="邮箱")
+    dorm_id: Optional[int] = Field(None, description="宿舍ID")
 
 
 class PasswordChange(BaseModel):
     """密码修改"""
     old_password: str = Field(..., min_length=6)
     new_password: str = Field(..., min_length=6)
+
+
+class AdminProfileUpdate(BaseModel):
+    """管理员自我信息更新"""
+    name: Optional[str] = Field(None, min_length=2, description="姓名")
+    email: Optional[EmailStr] = Field(None, description="邮箱")
+    phone: Optional[str] = Field(None, min_length=8, max_length=20, description="电话")
+    old_password: Optional[str] = Field(None, min_length=6, description="旧密码(修改密码时必填)")
+    new_password: Optional[str] = Field(None, min_length=6, description="新密码(修改密码时必填)")
 
 
 # ============================================================================

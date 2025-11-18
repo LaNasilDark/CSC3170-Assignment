@@ -82,6 +82,11 @@ async def register(
     - **enrollment_year**: 入学年份
     - **email**: 邮箱
     """
+
+
+
+
+    
     # 检查学号是否已存在
     existing_student = db.query(models.Student).filter(
         models.Student.student_id == student_data.student_id

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 
-from .routers import auth, students
+from .routers import auth, students, admin
 
 # 加载环境变量
 load_dotenv()
@@ -33,6 +33,7 @@ app.add_middleware(
 # 注册路由
 app.include_router(auth.router)
 app.include_router(students.router)
+app.include_router(admin.router)
 
 # 根路径
 @app.get("/", tags=["根路径"])
