@@ -65,6 +65,108 @@ async def login(
     )
 
 
+@router.post("/register", response_model=schemas.Token, summary="学生注册")
+async def register(
+    student_data: schemas.StudentRegister,
+    db: Session = Depends(get_db)
+):
+    """
+    新学生注册账户
+    
+    - **student_id**: 学号(9位)
+    - **password**: 密码(至少6位)
+    - **name**: 姓名
+    - **gender**: 性别(男/女)
+    - **nationality**: 国籍
+    - **college**: 学院代码(SSE/SME/MED/HSS/SAI/SDS/MUS)
+    - **enrollment_year**: 入学年份
+    - **email**: 邮箱
+    """
+    # 检查学号是否已存在
+    existing_student = db.query(models.Student).filter(
+        models.Student.student_id == student_data.student_id
+    ).first()
+    
+    if existing_student:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="该学号已被注册"
+        )
+    
+    # 检查邮箱是否已存在
+    existing_email = db.query(models.Student).filter(
+        models.Student.email == student_data.email
+    ).first()
+    
+    if existing_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="该邮箱已被使用"
+        )
+    
+    # 验证性别
+    if student_data.gender not in ["男", "女"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="性别必须是'男'或'女'"
+        )
+    
+    # 验证学院代码
+    valid_colleges = ["SSE", "SME", "MED", "HSS", "SAI", "SDS", "MUS"]
+    if student_data.college not in valid_colleges:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"学院代码必须是以下之一: {', '.join(valid_colleges)}"
+        )
+    
+    # 查找有空床位的同性别宿舍
+    available_dorm = db.query(models.Dormitory).filter(
+        models.Dormitory.gender_type == student_data.gender,
+        models.Dormitory.occupied_beds < models.Dormitory.total_beds
+    ).order_by(models.Dormitory.dorm_id).first()
+    
+    if not available_dorm:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"抱歉,当前没有可用的{student_data.gender}生宿舍,请联系管理员"
+        )
+    
+    # 创建新学生并分配宿舍
+    hashed_password = auth.get_password_hash(student_data.password)
+    new_student = models.Student(
+        student_id=student_data.student_id,
+        password=hashed_password,
+        name=student_data.name,
+        gender=student_data.gender,
+        nationality=student_data.nationality,
+        college=student_data.college,
+        enrollment_year=student_data.enrollment_year,
+        email=student_data.email,
+        dorm_id=available_dorm.dorm_id  # 自动分配宿舍
+    )
+    
+    # 更新宿舍占用床位数
+    available_dorm.occupied_beds += 1
+    
+    db.add(new_student)
+    db.commit()
+    db.refresh(new_student)
+    
+    # 自动登录，生成Token
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": new_student.student_id, "user_type": "student"},
+        expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_type": "student",
+        "user_id": new_student.student_id
+    }
+
+
 @router.get("/me", summary="获取当前用户信息")
 async def get_current_user_info(
     current_user = Depends(auth.get_current_user),

@@ -22,8 +22,16 @@ SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production"
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
-# 密码加密上下文
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# 密码加密上下文 - 使用Argon2id (最新最安全的密码哈希算法)
+# 支持从bcrypt自动迁移
+pwd_context = CryptContext(
+    schemes=["argon2", "bcrypt"],  # 支持Argon2和bcrypt(向后兼容)
+    deprecated=["bcrypt"],          # 标记bcrypt为过时,下次登录自动升级
+    argon2__memory_cost=65536,     # 64MB内存成本
+    argon2__time_cost=3,           # 3次迭代
+    argon2__parallelism=4,         # 4个并行线程
+    argon2__type="ID"              # 使用Argon2id变体(混合模式,最安全)
+)
 
 # OAuth2密码Bearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -32,36 +40,60 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     验证密码
-    支持bcrypt哈希密码和明文密码(用于测试)
+    支持Argon2、bcrypt和明文(测试数据兼容)
+    用户下次登录时会自动从bcrypt升级到Argon2
     """
     try:
-        # 尝试bcrypt验证
+        # passlib会自动识别哈希类型并验证
         return pwd_context.verify(plain_password, hashed_password)
     except Exception:
-        # 如果bcrypt验证失败,尝试明文比较(仅用于测试环境)
+        # 如果验证失败,尝试明文比较(仅用于测试环境的旧数据)
         return plain_password == hashed_password
 
 
 def get_password_hash(password: str) -> str:
-    """密码加密"""
+    """
+    使用Argon2id加密密码
+    优势:
+    - 无长度限制(解决了bcrypt的72字节问题)
+    - 更强的抗GPU/ASIC攻击能力
+    - 内存密集型设计
+    - 2015年密码哈希竞赛冠军
+    """
     return pwd_context.hash(password)
 
 
 def authenticate_student(db: Session, student_id: str, password: str) -> Optional[models.Student]:
     """
-    验证学生身份
+    验证学生身份并自动升级密码哈希
+    如果用户使用的是bcrypt或明文密码,验证成功后会自动升级到Argon2
     """
     student = db.query(models.Student).filter(models.Student.student_id == student_id).first()
     if not student:
         return None
     if not verify_password(password, student.password):
         return None
+    
+    # 检查是否需要升级密码哈希(从bcrypt或明文升级到Argon2)
+    current_hash = str(student.password)
+    try:
+        needs_upgrade = pwd_context.needs_update(current_hash)
+    except Exception:
+        # 如果是明文密码,needs_update会抛出异常,此时强制升级
+        needs_upgrade = True
+    
+    if needs_upgrade:
+        old_format = "明文" if not current_hash.startswith("$") else "bcrypt"
+        student.password = get_password_hash(password)
+        db.commit()
+        print(f"✅ 学生 {student_id} 的密码已自动从{old_format}升级到Argon2")
+    
     return student
 
 
 def authenticate_admin(db: Session, username: str, password: str) -> Optional[models.Administrator]:
     """
-    验证管理员身份
+    验证管理员身份并自动升级密码哈希
     """
     admin = db.query(models.Administrator).filter(
         models.Administrator.username == username,
@@ -71,6 +103,20 @@ def authenticate_admin(db: Session, username: str, password: str) -> Optional[mo
         return None
     if not verify_password(password, admin.password):
         return None
+    
+    # 如果密码需要更新(从bcrypt/明文升级到Argon2),自动升级
+    current_hash = str(admin.password)
+    try:
+        needs_upgrade = pwd_context.needs_update(current_hash)
+    except Exception:
+        needs_upgrade = True
+    
+    if needs_upgrade:
+        old_format = "明文" if not current_hash.startswith("$") else "bcrypt"
+        admin.password = get_password_hash(password)
+        db.commit()
+        print(f"✅ 管理员 {username} 的密码已自动从{old_format}升级到Argon2")
+    
     return admin
 
 

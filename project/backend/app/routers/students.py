@@ -267,6 +267,100 @@ async def get_maintenance_requests(
     return requests
 
 
+@router.put(
+    "/maintenance/{request_id}",
+    response_model=schemas.MaintenanceRequestInfo,
+    summary="修改维修申请"
+)
+async def update_maintenance_request(
+    request_id: int,
+    request_update: schemas.MaintenanceRequestStudentUpdate,
+    current_student: models.Student = Depends(auth.get_current_student),
+    db: Session = Depends(get_db)
+):
+    """
+    修改已提交但未完成的维修申请
+    只能修改状态为pending(待处理)或in_progress(处理中)的申请
+    """
+    # 查找维修申请
+    maintenance_request = db.query(models.MaintenanceRequest).filter(
+        models.MaintenanceRequest.request_id == request_id,
+        models.MaintenanceRequest.student_id == current_student.student_id
+    ).first()
+    
+    if not maintenance_request:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="维修申请不存在或您无权修改"
+        )
+    
+    # 检查申请状态,只允许修改未完成的申请
+    if maintenance_request.status not in ["pending", "in_progress"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"当前状态为'{maintenance_request.status}',无法修改。只能修改状态为'pending'或'in_progress'的申请"
+        )
+    
+    # 更新字段
+    update_data = request_update.model_dump(exclude_unset=True)
+    
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="至少需要提供一个要更新的字段"
+        )
+    
+    for field, value in update_data.items():
+        setattr(maintenance_request, field, value)
+    
+    db.commit()
+    db.refresh(maintenance_request)
+    
+    return maintenance_request
+
+
+@router.put("/profile", response_model=schemas.StudentProfile, summary="修改个人信息")
+async def update_student_profile(
+    student_update: schemas.StudentUpdate,
+    current_student: models.Student = Depends(auth.get_current_student),
+    db: Session = Depends(get_db)
+):
+    """
+    修改学生个人信息（姓名和邮箱）
+    
+    注意：只能修改姓名和邮箱，其他字段（如性别、国籍、学院等）不可修改
+    """
+    # 更新姓名
+    if student_update.name is not None:
+        if len(student_update.name.strip()) < 2:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="姓名至少需要2个字符"
+            )
+        current_student.name = student_update.name.strip()
+    
+    # 更新邮箱
+    if student_update.email is not None:
+        # 检查邮箱是否已被其他学生使用
+        existing_student = db.query(models.Student).filter(
+            models.Student.email == student_update.email,
+            models.Student.student_id != current_student.student_id
+        ).first()
+        
+        if existing_student:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="该邮箱已被其他学生使用"
+            )
+        
+        current_student.email = student_update.email
+    
+    db.commit()
+    db.refresh(current_student)
+    
+    return current_student
+
+
 @router.put("/password", response_model=schemas.MessageResponse, summary="修改密码")
 async def change_password(
     password_data: schemas.PasswordChange,

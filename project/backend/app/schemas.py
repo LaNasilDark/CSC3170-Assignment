@@ -46,6 +46,18 @@ class StudentBase(BaseModel):
     email: EmailStr
 
 
+class StudentRegister(BaseModel):
+    """学生注册"""
+    student_id: str = Field(..., min_length=9, max_length=9, description="学号(9位)")
+    password: str = Field(..., min_length=6, description="密码(至少6位)")
+    name: str = Field(..., min_length=2, description="姓名")
+    gender: str = Field(..., description="性别: 男/女")
+    nationality: str = Field(..., description="国籍")
+    college: str = Field(..., description="学院代码: SSE/SME/MED/HSS/SAI/SDS/MUS")
+    enrollment_year: int = Field(..., ge=2020, le=2030, description="入学年份")
+    email: EmailStr = Field(..., description="邮箱")
+
+
 class StudentProfile(StudentBase):
     """学生个人信息"""
     student_id: str
@@ -179,9 +191,16 @@ class MaintenanceRequestWithDetails(MaintenanceRequestInfo):
 
 
 class MaintenanceRequestUpdate(BaseModel):
-    """更新维修申请"""
+    """更新维修申请(管理员用)"""
     status: Optional[str] = None
     admin_comment: Optional[str] = Field(None, max_length=500)
+
+
+class MaintenanceRequestStudentUpdate(BaseModel):
+    """学生更新维修申请"""
+    issue_type: Optional[str] = Field(None, description="问题类型: 水电/家具/网络/其他")
+    description: Optional[str] = Field(None, min_length=1, max_length=500, description="问题描述")
+    priority: Optional[str] = Field(None, description="优先级: low/medium/high/urgent")
 
 
 # ============================================================================
