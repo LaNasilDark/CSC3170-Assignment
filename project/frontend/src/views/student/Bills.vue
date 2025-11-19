@@ -66,11 +66,11 @@
 
         <el-table-column prop="payment_date" label="支付日期" width="120">
           <template #default="{ row }">
-            {{ row.payment_date ? formatDate(row.payment_date) : '-' }}
+            {{ row.paid_at ? formatDate(row.paid_at) : '-' }}
           </template>
         </el-table-column>
 
-        <el-table-column prop="description" label="备注" show-overflow-tooltip />
+        <el-table-column prop="room_no" label="房间号" width="100" />
 
         <el-table-column prop="created_at" label="创建时间" width="160">
           <template #default="{ row }">
@@ -101,14 +101,31 @@ import { Wallet } from '@element-plus/icons-vue'
 import { getBills } from '@/api/student'
 
 const loading = ref(false)
-const bills = ref([])
+const allBills = ref([]) // 存储所有账单
 const filterStatus = ref('')
 const currentPage = ref(1)
 const pageSize = ref(20)
-const total = ref(0)
+
+// 根据筛选条件过滤账单
+const filteredBills = computed(() => {
+  if (!filterStatus.value) {
+    return allBills.value
+  }
+  return allBills.value.filter(bill => bill.status === filterStatus.value)
+})
+
+// 计算总数
+const total = computed(() => filteredBills.value.length)
+
+// 分页后的账单
+const bills = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredBills.value.slice(start, end)
+})
 
 const unpaidStats = computed(() => {
-  const unpaidBills = bills.value.filter(bill => bill.status === 'unpaid')
+  const unpaidBills = allBills.value.filter(bill => bill.status === 'unpaid')
   return {
     count: unpaidBills.length,
     amount: unpaidBills.reduce((sum, bill) => sum + parseFloat(bill.amount), 0).toFixed(2)
@@ -122,14 +139,8 @@ onMounted(() => {
 const loadBills = async () => {
   try {
     loading.value = true
-    const params = {
-      status: filterStatus.value || undefined,
-      skip: (currentPage.value - 1) * pageSize.value,
-      limit: pageSize.value
-    }
-    const data = await getBills(params)
-    bills.value = data
-    total.value = data.length // 注意:实际应该从后端返回总数
+    const data = await getBills()
+    allBills.value = data
   } catch (error) {
     console.error('加载账单失败:', error)
   } finally {
@@ -139,16 +150,14 @@ const loadBills = async () => {
 
 const handleFilter = () => {
   currentPage.value = 1
-  loadBills()
 }
 
 const handleSizeChange = () => {
   currentPage.value = 1
-  loadBills()
 }
 
 const handleCurrentChange = () => {
-  loadBills()
+  // 页码改变时不需要额外操作，computed会自动更新
 }
 
 const getBillTypeColor = (type) => {
