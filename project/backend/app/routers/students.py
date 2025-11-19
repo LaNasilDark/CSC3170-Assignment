@@ -51,6 +51,7 @@ async def get_student_dormitory(
         "building_no": dormitory.building_no,
         "floor_no": dormitory.floor_no,
         "room_no": dormitory.room_no,
+        "gender_type": dormitory.gender_type,
         "total_beds": dormitory.total_beds,
         "occupied_beds": dormitory.occupied_beds,
         "available_beds": dormitory.total_beds - dormitory.occupied_beds

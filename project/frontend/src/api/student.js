@@ -26,7 +26,7 @@ export function updateProfile(data) {
  */
 export function changePassword(data) {
     return request({
-        url: '/students/change-password',
+        url: '/students/password',
         method: 'put',
         data
     })

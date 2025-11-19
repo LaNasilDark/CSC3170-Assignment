@@ -37,7 +37,7 @@ request.interceptors.response.use(
 
             switch (status) {
                 case 401:
-                    ElMessage.error('登录已过期，请重新登录')
+                    ElMessage.error('用户名或密码错误')
                     clearAuth()
                     router.push('/login')
                     break
