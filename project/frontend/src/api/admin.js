@@ -43,6 +43,16 @@ export function updateStudent(studentId, data) {
 }
 
 /**
+ * 删除学生
+ */
+export function deleteStudent(studentId) {
+    return request({
+        url: `/admin/students/${studentId}`,
+        method: 'delete'
+    })
+}
+
+/**
  * 获取宿舍列表
  */
 export function getDormitories(params) {
@@ -64,11 +74,22 @@ export function getDormitoryStudents(dormId) {
 }
 
 /**
+ * 更新宿舍信息
+ */
+export function updateDormitory(dormId, data) {
+    return request({
+        url: `/admin/dormitories/${dormId}`,
+        method: 'put',
+        data
+    })
+}
+
+/**
  * 获取宿舍调换申请列表
  */
 export function getDormChangeRequests(params) {
     return request({
-        url: '/admin/dorm-change-requests',
+        url: '/admin/dorm-change',
         method: 'get',
         params
     })
@@ -79,8 +100,30 @@ export function getDormChangeRequests(params) {
  */
 export function handleDormChangeRequest(requestId, data) {
     return request({
-        url: `/admin/dorm-change-requests/${requestId}`,
+        url: `/admin/dorm-change/${requestId}`,
         method: 'put',
+        data
+    })
+}
+
+/**
+ * 批准宿舍调换申请
+ */
+export function approveDormChange(requestId, data) {
+    return request({
+        url: `/admin/dorm-change/${requestId}/approve`,
+        method: 'post',
+        data
+    })
+}
+
+/**
+ * 拒绝宿舍调换申请
+ */
+export function rejectDormChange(requestId, data) {
+    return request({
+        url: `/admin/dorm-change/${requestId}/reject`,
+        method: 'post',
         data
     })
 }
@@ -90,7 +133,7 @@ export function handleDormChangeRequest(requestId, data) {
  */
 export function getMaintenanceRequests(params) {
     return request({
-        url: '/admin/maintenance-requests',
+        url: '/admin/maintenance',
         method: 'get',
         params
     })
@@ -101,7 +144,18 @@ export function getMaintenanceRequests(params) {
  */
 export function updateMaintenanceRequest(requestId, data) {
     return request({
-        url: `/admin/maintenance-requests/${requestId}`,
+        url: `/admin/maintenance/${requestId}`,
+        method: 'put',
+        data
+    })
+}
+
+/**
+ * 更新维修申请状态
+ */
+export function updateMaintenanceStatus(requestId, data) {
+    return request({
+        url: `/admin/maintenance/${requestId}`,
         method: 'put',
         data
     })
@@ -121,11 +175,32 @@ export function getBills(params) {
 /**
  * 更新账单状态
  */
-export function updateBillStatus(billId, data) {
+export function updateBillStatus(billId, newStatus) {
     return request({
         url: `/admin/bills/${billId}`,
         method: 'put',
+        params: { new_status: newStatus }
+    })
+}
+
+/**
+ * 创建账单
+ */
+export function createBill(data) {
+    return request({
+        url: '/admin/bills',
+        method: 'post',
         data
+    })
+}
+
+/**
+ * 删除账单
+ */
+export function deleteBill(billId) {
+    return request({
+        url: `/admin/bills/${billId}`,
+        method: 'delete'
     })
 }
 
@@ -135,6 +210,17 @@ export function updateBillStatus(billId, data) {
 export function updateAdminProfile(data) {
     return request({
         url: '/admin/profile',
+        method: 'put',
+        data
+    })
+}
+
+/**
+ * 修改管理员密码
+ */
+export function changeAdminPassword(data) {
+    return request({
+        url: '/admin/password',
         method: 'put',
         data
     })

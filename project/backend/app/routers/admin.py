@@ -20,6 +20,7 @@ router = APIRouter(prefix="/api/admin", tags=["管理员功能"])
 @router.get("/dormitories", summary="查看所有宿舍")
 async def get_all_dormitories(
     building: Optional[str] = Query(None, description="按楼栋筛选"),
+    room_no: Optional[str] = Query(None, description="按房间号筛选"),
     gender_type: Optional[str] = Query(None, description="按性别筛选"),
     has_vacancy: Optional[bool] = Query(None, description="仅显示有空位的宿舍"),
     skip: int = Query(0, ge=0),
@@ -35,6 +36,8 @@ async def get_all_dormitories(
     # 应用筛选条件
     if building:
         query = query.filter(models.Dormitory.building_no == building)
+    if room_no:
+        query = query.filter(models.Dormitory.room_no.like(f"%{room_no}%"))
     if gender_type:
         query = query.filter(models.Dormitory.gender_type == gender_type)
     if has_vacancy is True:
@@ -80,6 +83,63 @@ async def get_dormitory_detail(
         "students": students,
         "vacancy": dormitory.total_beds - dormitory.occupied_beds
     }
+
+
+@router.get("/dormitories/{dorm_id}/students", summary="查看宿舍居住学生")
+async def get_dormitory_students(
+    dorm_id: int,
+    current_admin: models.Administrator = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    获取指定宿舍的居住学生列表
+    """
+    # 验证宿舍存在
+    dormitory = db.query(models.Dormitory).filter(
+        models.Dormitory.dorm_id == dorm_id
+    ).first()
+    
+    if not dormitory:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="宿舍不存在"
+        )
+    
+    # 获取该宿舍的所有学生
+    students = db.query(models.Student).filter(
+        models.Student.dorm_id == dorm_id
+    ).all()
+    
+    return students
+
+
+@router.put("/dormitories/{dorm_id}", summary="更新宿舍信息")
+async def update_dormitory(
+    dorm_id: int,
+    dorm_update: schemas.DormitoryUpdate,
+    current_admin: models.Administrator = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    管理员更新宿舍信息
+    注意: 数据库表中暂无description字段,此端点主要用于未来扩展
+    当前版本只进行数据验证,不实际更新
+    """
+    dormitory = db.query(models.Dormitory).filter(
+        models.Dormitory.dorm_id == dorm_id
+    ).first()
+    
+    if not dormitory:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="宿舍不存在"
+        )
+    
+    # 注意: 由于数据库表中没有description字段
+    # 此处不执行实际更新,但返回成功以保持API兼容性
+    # 未来可通过数据库迁移添加description列后启用此功能
+    
+    return dormitory
 
 
 # ============================================================================
@@ -265,11 +325,45 @@ async def update_student_info(
     return student
 
 
+@router.delete("/students/{student_id}", summary="删除学生")
+async def delete_student(
+    student_id: str,
+    current_admin: models.Administrator = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    管理员删除学生
+    会同时更新宿舍床位计数
+    """
+    student = db.query(models.Student).filter(
+        models.Student.student_id == student_id
+    ).first()
+    
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="学生不存在"
+        )
+    
+    # 如果学生有宿舍,减少宿舍床位计数
+    if student.dorm_id:
+        dorm = db.query(models.Dormitory).filter(
+            models.Dormitory.dorm_id == student.dorm_id
+        ).first()
+        if dorm and dorm.occupied_beds > 0:
+            dorm.occupied_beds -= 1
+    
+    db.delete(student)
+    db.commit()
+    
+    return {"message": "学生删除成功"}
+
+
 # ============================================================================
 # 宿舍调换申请管理
 # ============================================================================
 
-@router.get("/dorm-change-requests", summary="查看所有调换申请")
+@router.get("/dorm-change", summary="查看所有调换申请")
 async def get_dorm_change_requests(
     status_filter: Optional[str] = Query(None, description="按状态筛选: pending/approved/rejected"),
     skip: int = Query(0, ge=0),
@@ -278,24 +372,48 @@ async def get_dorm_change_requests(
     db: Session = Depends(get_db)
 ):
     """
-    查看所有宿舍调换申请
+    查看所有宿舍调换申请（包含学生和宿舍信息）
     """
-    query = db.query(models.DormChangeRequest)
+    query = db.query(
+        models.DormChangeRequest,
+        models.Student.name.label('student_name'),
+        models.Dormitory.room_no.label('current_dorm')
+    ).join(
+        models.Student,
+        models.DormChangeRequest.student_id == models.Student.student_id
+    ).outerjoin(
+        models.Dormitory,
+        models.Student.dorm_id == models.Dormitory.dorm_id
+    )
     
     if status_filter:
         query = query.filter(models.DormChangeRequest.status == status_filter)
     
-    total = query.count()
-    requests = query.order_by(
+    results = query.order_by(
         models.DormChangeRequest.created_at.desc()
     ).offset(skip).limit(limit).all()
     
-    return {
-        "total": total,
-        "items": requests,
-        "skip": skip,
-        "limit": limit
-    }
+    # 获取目标宿舍信息
+    items = []
+    for request, student_name, current_dorm in results:
+        target_dorm = db.query(models.Dormitory).filter(
+            models.Dormitory.dorm_id == request.target_dorm_id
+        ).first()
+        
+        items.append({
+            "request_id": request.request_id,
+            "student_id": request.student_id,
+            "student_name": student_name,
+            "current_dorm": current_dorm or "未分配",
+            "target_dorm": target_dorm.room_no if target_dorm else "未知",
+            "reason": request.reason,
+            "status": request.status,
+            "admin_comment": request.admin_comment,
+            "created_at": request.created_at,
+            "updated_at": request.updated_at
+        })
+    
+    return items
 
 
 @router.put("/dorm-change-requests/{request_id}", summary="处理调换申请")
@@ -380,44 +498,173 @@ async def process_dorm_change_request(
     return request
 
 
+@router.post("/dorm-change/{request_id}/approve", summary="通过调换申请")
+async def approve_dorm_change(
+    request_id: int,
+    request_body: dict,
+    current_admin: models.Administrator = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    通过宿舍调换申请
+    """
+    admin_comment = request_body.get("admin_comment", "")
+    
+    request = db.query(models.DormChangeRequest).filter(
+        models.DormChangeRequest.request_id == request_id
+    ).first()
+    
+    if not request:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="申请不存在"
+        )
+    
+    if request.status != "pending":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"该申请当前状态为'{request.status}',无法处理"
+        )
+    
+    student = db.query(models.Student).filter(
+        models.Student.student_id == request.student_id
+    ).first()
+    
+    if student and student.dorm_id:
+        # 减少原宿舍的occupied_beds
+        old_dorm = db.query(models.Dormitory).filter(
+            models.Dormitory.dorm_id == student.dorm_id
+        ).first()
+        if old_dorm and old_dorm.occupied_beds > 0:
+            old_dorm.occupied_beds -= 1
+    
+    # 增加新宿舍的occupied_beds
+    new_dorm = db.query(models.Dormitory).filter(
+        models.Dormitory.dorm_id == request.target_dorm_id
+    ).first()
+    
+    if not new_dorm:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="目标宿舍不存在"
+        )
+    
+    if new_dorm.occupied_beds >= new_dorm.total_beds:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="目标宿舍已满,无法批准"
+        )
+    
+    new_dorm.occupied_beds += 1
+    
+    # 更新学生宿舍
+    if student:
+        student.dorm_id = request.target_dorm_id
+    
+    # 更新申请状态
+    request.status = "approved"
+    request.admin_id = current_admin.admin_id
+    request.admin_comment = admin_comment
+    request.processed_at = datetime.utcnow()
+    
+    db.commit()
+    
+    return {"message": "申请已通过"}
+
+
+@router.post("/dorm-change/{request_id}/reject", summary="拒绝调换申请")
+async def reject_dorm_change(
+    request_id: int,
+    request_body: dict,
+    current_admin: models.Administrator = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    拒绝宿舍调换申请
+    """
+    admin_comment = request_body.get("admin_comment", "")
+    
+    request = db.query(models.DormChangeRequest).filter(
+        models.DormChangeRequest.request_id == request_id
+    ).first()
+    
+    if not request:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="申请不存在"
+        )
+    
+    if request.status != "pending":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"该申请当前状态为'{request.status}',无法处理"
+        )
+    
+    # 更新申请状态
+    request.status = "rejected"
+    request.admin_id = current_admin.admin_id
+    request.admin_comment = admin_comment
+    request.processed_at = datetime.utcnow()
+    
+    db.commit()
+    
+    return {"message": "申请已拒绝"}
+
+
 # ============================================================================
 # 维修申请管理
 # ============================================================================
 
-@router.get("/maintenance-requests", summary="查看所有维修申请")
+@router.get("/maintenance", summary="查看所有维修申请")
 async def get_maintenance_requests(
     status_filter: Optional[str] = Query(None, description="按状态筛选: pending/in_progress/completed/cancelled"),
-    priority: Optional[str] = Query(None, description="按优先级筛选: low/medium/high/urgent"),
+    priority: Optional[str] = Query(None, description="按优先级筛选: low/medium/high"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     current_admin: models.Administrator = Depends(auth.get_current_admin),
     db: Session = Depends(get_db)
 ):
     """
-    查看所有维修申请
+    查看所有维修申请（包含学生信息）
     """
-    query = db.query(models.MaintenanceRequest)
+    query = db.query(
+        models.MaintenanceRequest,
+        models.Student.name.label('student_name')
+    ).join(
+        models.Student,
+        models.MaintenanceRequest.student_id == models.Student.student_id
+    )
     
     if status_filter:
         query = query.filter(models.MaintenanceRequest.status == status_filter)
     if priority:
         query = query.filter(models.MaintenanceRequest.priority == priority)
     
-    total = query.count()
-    requests = query.order_by(
-        models.MaintenanceRequest.priority.desc(),
+    results = query.order_by(
         models.MaintenanceRequest.created_at.desc()
     ).offset(skip).limit(limit).all()
     
-    return {
-        "total": total,
-        "items": requests,
-        "skip": skip,
-        "limit": limit
-    }
+    items = []
+    for request, student_name in results:
+        items.append({
+            "request_id": request.request_id,
+            "student_id": request.student_id,
+            "student_name": student_name,
+            "dorm_id": request.dorm_id,
+            "issue_type": request.issue_type,
+            "description": request.description,
+            "priority": request.priority,
+            "status": request.status,
+            "admin_comment": request.admin_comment,
+            "created_at": request.created_at,
+            "updated_at": request.updated_at,
+            "completed_at": request.completed_at
+        })
+    
+    return items
 
 
-@router.put("/maintenance-requests/{request_id}", summary="更新维修申请")
+@router.put("/maintenance/{request_id}", summary="更新维修申请")
 async def update_maintenance_request(
     request_id: int,
     update_data: schemas.MaintenanceRequestUpdate,
@@ -460,6 +707,7 @@ async def update_maintenance_request(
 
 @router.get("/bills", summary="查看所有账单")
 async def get_all_bills(
+    dorm_id: Optional[int] = Query(None, description="按宿舍ID筛选"),
     status_filter: Optional[str] = Query(None, description="按状态筛选: unpaid/paid/overdue"),
     bill_type: Optional[str] = Query(None, description="按类型筛选"),
     skip: int = Query(0, ge=0),
@@ -472,6 +720,8 @@ async def get_all_bills(
     """
     query = db.query(models.Bill)
     
+    if dorm_id:
+        query = query.filter(models.Bill.dorm_id == dorm_id)
     if status_filter:
         query = query.filter(models.Bill.status == status_filter)
     if bill_type:
@@ -524,6 +774,66 @@ async def update_bill_status(
     return bill
 
 
+@router.post("/bills", summary="创建账单")
+async def create_bill(
+    bill_data: schemas.BillCreate,
+    current_admin: models.Administrator = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    管理员创建新账单
+    """
+    # 验证宿舍是否存在
+    dorm = db.query(models.Dormitory).filter(
+        models.Dormitory.dorm_id == bill_data.dorm_id
+    ).first()
+    
+    if not dorm:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="宿舍不存在"
+        )
+    
+    # 创建账单
+    new_bill = models.Bill(
+        dorm_id=bill_data.dorm_id,
+        bill_type=bill_data.bill_type,
+        amount=bill_data.amount,
+        billing_month=bill_data.billing_month,
+        due_date=bill_data.due_date,
+        status="unpaid"
+    )
+    
+    db.add(new_bill)
+    db.commit()
+    db.refresh(new_bill)
+    
+    return new_bill
+
+
+@router.delete("/bills/{bill_id}", summary="删除账单")
+async def delete_bill(
+    bill_id: int,
+    current_admin: models.Administrator = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    管理员删除账单
+    """
+    bill = db.query(models.Bill).filter(models.Bill.bill_id == bill_id).first()
+    
+    if not bill:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="账单不存在"
+        )
+    
+    db.delete(bill)
+    db.commit()
+    
+    return {"message": "账单删除成功"}
+
+
 # ============================================================================
 # 统计数据
 # ============================================================================
@@ -538,14 +848,18 @@ async def get_statistics(
     """
     # 学生统计
     total_students = db.query(func.count(models.Student.student_id)).scalar()
-    students_with_dorm = db.query(func.count(models.Student.student_id)).filter(
-        models.Student.dorm_id.isnot(None)
+    male_students = db.query(func.count(models.Student.student_id)).filter(
+        models.Student.gender == "男"
+    ).scalar()
+    female_students = db.query(func.count(models.Student.student_id)).filter(
+        models.Student.gender == "女"
     ).scalar()
     
     # 宿舍统计
     total_dorms = db.query(func.count(models.Dormitory.dorm_id)).scalar()
     total_beds = db.query(func.sum(models.Dormitory.total_beds)).scalar() or 0
     occupied_beds = db.query(func.sum(models.Dormitory.occupied_beds)).scalar() or 0
+    available_beds = total_beds - occupied_beds
     
     # 申请统计
     pending_dorm_changes = db.query(func.count(models.DormChangeRequest.request_id)).filter(
@@ -561,31 +875,17 @@ async def get_statistics(
         models.Bill.status == "unpaid"
     ).scalar()
     
-    total_unpaid_amount = db.query(func.sum(models.Bill.amount)).filter(
-        models.Bill.status == "unpaid"
-    ).scalar() or 0
-    
     return {
-        "students": {
-            "total": total_students,
-            "with_dorm": students_with_dorm,
-            "without_dorm": total_students - students_with_dorm
-        },
-        "dormitories": {
-            "total": total_dorms,
-            "total_beds": total_beds,
-            "occupied_beds": occupied_beds,
-            "vacant_beds": total_beds - occupied_beds,
-            "occupancy_rate": round(occupied_beds / total_beds * 100, 2) if total_beds > 0 else 0
-        },
-        "requests": {
-            "pending_dorm_changes": pending_dorm_changes,
-            "pending_maintenance": pending_maintenance
-        },
-        "bills": {
-            "unpaid_count": unpaid_bills,
-            "unpaid_amount": float(total_unpaid_amount)
-        }
+        "total_students": total_students,
+        "male_students": male_students,
+        "female_students": female_students,
+        "total_dorms": total_dorms,
+        "total_beds": total_beds,
+        "occupied_beds": occupied_beds,
+        "available_beds": available_beds,
+        "pending_dorm_changes": pending_dorm_changes,
+        "pending_maintenance": pending_maintenance,
+        "unpaid_bills": unpaid_bills
     }
 
 
@@ -683,4 +983,48 @@ def update_admin_profile(
         "admin_id": admin.admin_id,
         "username": admin.username,
         "updated_fields": list(update_data.keys())
+    }
+
+
+@router.put("/password", summary="管理员修改密码")
+def change_admin_password(
+    password_data: schemas.AdminPasswordChange,
+    current_admin: models.Administrator = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    管理员修改自己的密码
+    需要验证旧密码
+    """
+    from argon2 import PasswordHasher
+    from argon2.exceptions import VerifyMismatchError
+    
+    ph = PasswordHasher(
+        memory_cost=65536,
+        time_cost=3,
+        parallelism=4
+    )
+    
+    # 获取当前管理员信息
+    admin = db.query(models.Administrator).filter(
+        models.Administrator.admin_id == current_admin.admin_id
+    ).first()
+    
+    if not admin:
+        raise HTTPException(status_code=404, detail="管理员不存在")
+    
+    # 验证旧密码
+    try:
+        ph.verify(admin.password, password_data.old_password)
+    except VerifyMismatchError:
+        raise HTTPException(status_code=400, detail="当前密码错误")
+    
+    # 哈希新密码
+    hashed_password = ph.hash(password_data.new_password)
+    admin.password = hashed_password
+    
+    db.commit()
+    
+    return {
+        "message": "密码修改成功"
     }

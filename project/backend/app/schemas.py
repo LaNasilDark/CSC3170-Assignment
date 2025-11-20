@@ -100,6 +100,12 @@ class AdminProfileUpdate(BaseModel):
     new_password: Optional[str] = Field(None, min_length=6, description="新密码(修改密码时必填)")
 
 
+class AdminPasswordChange(BaseModel):
+    """管理员修改密码"""
+    old_password: str = Field(..., min_length=6, description="当前密码")
+    new_password: str = Field(..., min_length=6, description="新密码")
+
+
 # ============================================================================
 # 宿舍相关
 # ============================================================================
@@ -121,6 +127,11 @@ class DormitoryInfo(DormitoryBase):
 
     class Config:
         from_attributes = True
+
+
+class DormitoryUpdate(BaseModel):
+    """宿舍信息更新"""
+    description: Optional[str] = Field(None, max_length=200, description="宿舍描述")
 
 
 class RoommateInfo(BaseModel):
@@ -241,6 +252,15 @@ class BillInfo(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class BillCreate(BaseModel):
+    """创建账单"""
+    dorm_id: int
+    bill_type: str
+    amount: Decimal
+    billing_month: str
+    due_date: date
 
 
 class BillWithDormInfo(BillInfo):
