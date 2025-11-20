@@ -187,6 +187,7 @@ async def get_current_user_info(
             "user_type": "student",
             "student_id": user.student_id,
             "name": user.name,
+            "gender": user.gender,
             "email": user.email,
             "college": user.college,
             "dorm_id": user.dorm_id

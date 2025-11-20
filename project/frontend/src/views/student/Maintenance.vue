@@ -47,11 +47,14 @@
             </div>
 
             <el-descriptions :column="2" border style="margin-top: 15px">
-              <el-descriptions-item label="问题描述" :span="2">
-                {{ request.description }}
+              <el-descriptions-item label="问题类型">
+                {{ request.issue_type }}
               </el-descriptions-item>
               <el-descriptions-item label="提交时间">
                 {{ formatDateTime(request.created_at) }}
+              </el-descriptions-item>
+              <el-descriptions-item label="问题描述" :span="2">
+                {{ request.description }}
               </el-descriptions-item>
               <el-descriptions-item label="更新时间">
                 {{ formatDateTime(request.updated_at) }}
@@ -83,6 +86,15 @@
         ref="formRef" 
         label-width="100px"
       >
+        <el-form-item label="问题类型" prop="issue_type">
+          <el-select v-model="form.issue_type" placeholder="请选择问题类型" style="width: 100%">
+            <el-option label="水电问题" value="水电" />
+            <el-option label="家具问题" value="家具" />
+            <el-option label="网络问题" value="网络" />
+            <el-option label="其他问题" value="其他" />
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="问题描述" prop="description">
           <el-input 
             v-model="form.description" 
@@ -131,11 +143,15 @@ const formRef = ref(null)
 const currentRequestId = ref(null)
 
 const form = reactive({
+  issue_type: '',
   description: '',
   priority: 'medium'
 })
 
 const rules = {
+  issue_type: [
+    { required: true, message: '请选择问题类型', trigger: 'change' }
+  ],
   description: [
     { required: true, message: '请输入问题描述', trigger: 'blur' },
     { min: 10, max: 500, message: '描述长度在10-500字之间', trigger: 'blur' }
@@ -165,11 +181,13 @@ const openDialog = (request = null) => {
   if (request) {
     isEdit.value = true
     currentRequestId.value = request.request_id
+    form.issue_type = request.issue_type
     form.description = request.description
     form.priority = request.priority
   } else {
     isEdit.value = false
     currentRequestId.value = null
+    form.issue_type = ''
     form.description = ''
     form.priority = 'medium'
   }

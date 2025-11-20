@@ -245,9 +245,11 @@ const loadDormitory = async () => {
 const loadBills = async () => {
   try {
     loading.bills = true
-    const data = await getBills({ status: 'unpaid' })
-    unpaidCount.value = data.length
-    unpaidAmount.value = data.reduce((sum, bill) => sum + parseFloat(bill.amount), 0).toFixed(2)
+    const data = await getBills()
+    // 只统计未支付的账单
+    const unpaidBills = data.filter(bill => bill.status === 'unpaid')
+    unpaidCount.value = unpaidBills.length
+    unpaidAmount.value = unpaidBills.reduce((sum, bill) => sum + parseFloat(bill.amount), 0).toFixed(2)
   } catch (error) {
     console.error('加载账单信息失败:', error)
   } finally {

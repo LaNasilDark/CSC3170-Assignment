@@ -212,6 +212,9 @@ const handleUpdateProfile = async () => {
 
     ElMessage.success('个人信息更新成功')
     await loadProfile()
+    
+    // 刷新页面以更新右上角的用户名显示
+    window.location.reload()
   } catch (error) {
     if (error !== false) { // 不是表单验证失败
       console.error('更新个人信息失败:', error)

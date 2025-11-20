@@ -81,6 +81,39 @@ async def get_roommates(
     return roommates
 
 
+@router.get("/dormitories", summary="查询宿舍列表")
+async def query_dormitories(
+    building_no: str = None,
+    room_no: str = None,
+    current_student: models.Student = Depends(auth.get_current_student),
+    db: Session = Depends(get_db)
+):
+    """
+    查询宿舍列表（用于宿舍调换申请时验证目标宿舍）
+    """
+    query = db.query(models.Dormitory)
+    
+    if building_no:
+        query = query.filter(models.Dormitory.building_no == building_no)
+    if room_no:
+        query = query.filter(models.Dormitory.room_no == room_no)
+    
+    dormitories = query.all()
+    
+    result = []
+    for dorm in dormitories:
+        result.append({
+            "dorm_id": dorm.dorm_id,
+            "building_no": dorm.building_no,
+            "room_no": dorm.room_no,
+            "gender_type": dorm.gender_type,
+            "total_beds": dorm.total_beds,
+            "occupied_beds": dorm.occupied_beds
+        })
+    
+    return result
+
+
 @router.get("/bills", response_model=List[schemas.BillWithDormInfo], summary="查看账单")
 async def get_student_bills(
     current_student: models.Student = Depends(auth.get_current_student),

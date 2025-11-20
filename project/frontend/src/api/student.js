@@ -68,7 +68,7 @@ export function getBills(params) {
  */
 export function getDormChangeRequests() {
     return request({
-        url: '/students/dorm-change-requests',
+        url: '/students/dorm-change',
         method: 'get'
     })
 }
@@ -78,7 +78,7 @@ export function getDormChangeRequests() {
  */
 export function createDormChangeRequest(data) {
     return request({
-        url: '/students/dorm-change-requests',
+        url: '/students/dorm-change',
         method: 'post',
         data
     })
@@ -89,7 +89,7 @@ export function createDormChangeRequest(data) {
  */
 export function getMaintenanceRequests() {
     return request({
-        url: '/students/maintenance-requests',
+        url: '/students/maintenance',
         method: 'get'
     })
 }
@@ -99,7 +99,7 @@ export function getMaintenanceRequests() {
  */
 export function createMaintenanceRequest(data) {
     return request({
-        url: '/students/maintenance-requests',
+        url: '/students/maintenance',
         method: 'post',
         data
     })
@@ -110,7 +110,7 @@ export function createMaintenanceRequest(data) {
  */
 export function updateMaintenanceRequest(id, data) {
     return request({
-        url: `/students/maintenance-requests/${id}`,
+        url: `/students/maintenance/${id}`,
         method: 'put',
         data
     })
