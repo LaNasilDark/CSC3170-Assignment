@@ -1,9 +1,9 @@
 <template>
   <el-container class="layout-container">
     <el-header class="header">
-      <div class="header-left">
+        <div class="header-left">
         <el-icon style="font-size: 24px; margin-right: 10px"><Setting /></el-icon>
-        <span class="title">宿舍管理系统 - 管理后台</span>
+        <span class="title">Dormitory Management System - Admin Panel</span>
       </div>
       <div class="header-right">
         <el-dropdown @command="handleCommand">
@@ -14,8 +14,8 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="profile">个人设置</el-dropdown-item>
-              <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+              <el-dropdown-item command="profile">Profile</el-dropdown-item>
+              <el-dropdown-item command="logout" divided>Logout</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -33,31 +33,31 @@
         >
           <el-menu-item index="/admin/dashboard">
             <el-icon><DataAnalysis /></el-icon>
-            <span>系统概览</span>
+            <span>Overview</span>
           </el-menu-item>
           <el-menu-item index="/admin/students">
             <el-icon><User /></el-icon>
-            <span>学生管理</span>
+            <span>Students</span>
           </el-menu-item>
           <el-menu-item index="/admin/dormitories">
             <el-icon><House /></el-icon>
-            <span>宿舍管理</span>
+            <span>Dormitories</span>
           </el-menu-item>
           <el-menu-item index="/admin/dorm-requests">
             <el-icon><Sort /></el-icon>
-            <span>调换审批</span>
+            <span>Dorm Change Approvals</span>
           </el-menu-item>
           <el-menu-item index="/admin/maintenance">
             <el-icon><Tools /></el-icon>
-            <span>维修处理</span>
+            <span>Maintenance</span>
           </el-menu-item>
           <el-menu-item index="/admin/bills">
             <el-icon><Tickets /></el-icon>
-            <span>账单管理</span>
+            <span>Bills</span>
           </el-menu-item>
           <el-menu-item index="/admin/profile">
             <el-icon><Setting /></el-icon>
-            <span>个人设置</span>
+            <span>Profile</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -82,14 +82,14 @@ import { getCurrentUser } from '@/api/auth'
 import { clearAuth } from '@/utils/auth'
 
 const router = useRouter()
-const userName = ref('管理员')
+const userName = ref('Administrator')
 
 onMounted(async () => {
   try {
     const data = await getCurrentUser()
     userName.value = data.name || data.username
   } catch (error) {
-    console.error('获取用户信息失败:', error)
+    console.error('Failed to get user info:', error)
   }
 })
 
@@ -97,17 +97,17 @@ const handleCommand = async (command) => {
   if (command === 'profile') {
     router.push('/admin/profile')
   } else if (command === 'logout') {
-    try {
-      await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      try {
+      await ElMessageBox.confirm('Are you sure you want to log out?', 'Confirm', {
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       })
       clearAuth()
-      ElMessage.success('已退出登录')
+      ElMessage.success('Logged out')
       router.push('/login')
     } catch (error) {
-      // 用户取消
+      // user cancelled
     }
   }
 }

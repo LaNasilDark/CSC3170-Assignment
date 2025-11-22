@@ -4,13 +4,13 @@
       <template #header>
         <div class="card-header">
           <el-icon><User /></el-icon>
-          <span>个人信息管理</span>
+          <span>Profile Management</span>
         </div>
       </template>
 
       <el-tabs v-model="activeTab">
-        <!-- 基本信息 -->
-        <el-tab-pane label="基本信息" name="profile">
+        <!-- Basic Info -->
+        <el-tab-pane label="Basic Info" name="profile">
           <el-form 
             :model="profileForm" 
             :rules="profileRules" 
@@ -18,28 +18,28 @@
             label-width="100px"
             style="max-width: 600px; margin-top: 20px"
           >
-            <el-form-item label="用户名">
+            <el-form-item label="Username">
               <el-input v-model="profileForm.username" disabled />
             </el-form-item>
-            <el-form-item label="姓名" prop="name">
-              <el-input v-model="profileForm.name" placeholder="请输入姓名" />
+            <el-form-item label="Name" prop="name">
+              <el-input v-model="profileForm.name" placeholder="Enter name" />
             </el-form-item>
-            <el-form-item label="邮箱" prop="email">
-              <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
+            <el-form-item label="Email" prop="email">
+              <el-input v-model="profileForm.email" placeholder="Enter email" />
             </el-form-item>
-            <el-form-item label="电话" prop="phone">
-              <el-input v-model="profileForm.phone" placeholder="请输入电话" />
+            <el-form-item label="Phone" prop="phone">
+              <el-input v-model="profileForm.phone" placeholder="Enter phone" />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleUpdateProfile" :loading="submitting">
-                保存修改
+                Save Changes
               </el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
 
-        <!-- 修改密码 -->
-        <el-tab-pane label="修改密码" name="password">
+        <!-- Change Password -->
+        <el-tab-pane label="Change Password" name="password">
           <el-form 
             :model="passwordForm" 
             :rules="passwordRules" 
@@ -51,7 +51,7 @@
               <el-input 
                 v-model="passwordForm.old_password" 
                 type="password" 
-                placeholder="请输入当前密码"
+                placeholder="Enter current password"
                 show-password
               />
             </el-form-item>
@@ -59,7 +59,7 @@
               <el-input 
                 v-model="passwordForm.new_password" 
                 type="password" 
-                placeholder="请输入新密码（至少6位）"
+                placeholder="Enter new password (at least 6 characters)"
                 show-password
               />
             </el-form-item>
@@ -67,13 +67,13 @@
               <el-input 
                 v-model="passwordForm.confirm_password" 
                 type="password" 
-                placeholder="请再次输入新密码"
+                placeholder="Confirm new password"
                 show-password
               />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="handleChangePassword" :loading="submitting">
-                修改密码
+                Change Password
               </el-button>
             </el-form-item>
           </el-form>
@@ -110,7 +110,7 @@ const passwordForm = reactive({
 
 const validateConfirmPassword = (rule, value, callback) => {
   if (value !== passwordForm.new_password) {
-    callback(new Error('两次输入的密码不一致'))
+    callback(new Error('Passwords do not match'))
   } else {
     callback()
   }
@@ -118,24 +118,24 @@ const validateConfirmPassword = (rule, value, callback) => {
 
 const profileRules = {
   name: [
-    { required: true, message: '请输入姓名', trigger: 'blur' }
+    { required: true, message: 'Please enter name', trigger: 'blur' }
   ],
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+    { required: true, message: 'Please enter email', trigger: 'blur' },
+    { type: 'email', message: 'Please enter a valid email address', trigger: 'blur' }
   ]
 }
 
 const passwordRules = {
   old_password: [
-    { required: true, message: '请输入当前密码', trigger: 'blur' }
+    { required: true, message: 'Please enter current password', trigger: 'blur' }
   ],
   new_password: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '密码长度至少6位', trigger: 'blur' }
+    { required: true, message: 'Please enter new password', trigger: 'blur' },
+    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
   ],
   confirm_password: [
-    { required: true, message: '请再次输入新密码', trigger: 'blur' },
+    { required: true, message: 'Please confirm the new password', trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: 'blur' }
   ]
 }
@@ -152,7 +152,7 @@ const loadProfile = async () => {
     profileForm.email = data.email || ''
     profileForm.phone = data.phone || ''
   } catch (error) {
-    console.error('加载个人信息失败:', error)
+    console.error('Failed to load profile:', error)
   }
 }
 
@@ -161,18 +161,20 @@ const handleUpdateProfile = async () => {
     await profileFormRef.value.validate()
     submitting.value = true
 
-    await updateAdminProfile({
-      name: profileForm.name,
-      email: profileForm.email,
-      phone: profileForm.phone
-    })
+    // 只发送非空字段
+    const updateData = {}
+    if (profileForm.name) updateData.name = profileForm.name
+    if (profileForm.email) updateData.email = profileForm.email
+    if (profileForm.phone) updateData.phone = profileForm.phone
 
-    ElMessage.success('个人信息更新成功')
+    await updateAdminProfile(updateData)
+
+    ElMessage.success('Profile updated successfully')
     window.location.reload()
   } catch (error) {
     if (error !== false) {
-      console.error('更新个人信息失败:', error)
-      ElMessage.error('更新个人信息失败')
+      console.error('Failed to update profile:', error)
+      ElMessage.error('Failed to update profile')
     }
   } finally {
     submitting.value = false
@@ -189,9 +191,9 @@ const handleChangePassword = async () => {
       new_password: passwordForm.new_password
     })
 
-    ElMessage.success('密码修改成功，请重新登录')
+    ElMessage.success('Password changed successfully, please log in again')
     
-    // 清除认证信息并跳转到登录页
+    // clear auth and redirect to login
     setTimeout(() => {
       localStorage.removeItem('token')
       localStorage.removeItem('userType')
@@ -199,8 +201,8 @@ const handleChangePassword = async () => {
     }, 1500)
   } catch (error) {
     if (error !== false) {
-      console.error('修改密码失败:', error)
-      ElMessage.error('修改密码失败，请检查当前密码是否正确')
+      console.error('Failed to change password:', error)
+      ElMessage.error('Failed to change password, please check current password')
     }
   } finally {
     submitting.value = false

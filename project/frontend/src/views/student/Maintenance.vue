@@ -3,66 +3,52 @@
     <el-card shadow="hover">
       <template #header>
         <div class="card-header">
-          <el-icon><Tools /></el-icon>
-          <span>维修申请管理</span>
-          <el-button 
-            type="primary" 
-            :icon="Plus" 
-            @click="openDialog()"
-            style="margin-left: auto"
-          >
-            新建维修申请
+          <el-icon>
+            <Tools />
+          </el-icon>
+          <span>Maintenance Requests</span>
+          <el-button type="primary" :icon="Plus" @click="openDialog()" style="margin-left: auto">
+            New Maintenance Request
           </el-button>
         </div>
       </template>
 
-      <!-- 申请列表 -->
+      <!-- Request list -->
       <el-timeline>
-        <el-timeline-item 
-          v-for="request in requests" 
-          :key="request.request_id"
-          :timestamp="formatDateTime(request.created_at)"
-          placement="top"
-          :type="getTimelineType(request.status)"
-          :icon="getStatusIcon(request.status)"
-        >
+        <el-timeline-item v-for="request in requests" :key="request.request_id"
+          :timestamp="formatDateTime(request.created_at)" placement="top" :type="getTimelineType(request.status)"
+          :icon="getStatusIcon(request.status)">
           <el-card>
             <div class="request-header">
               <el-tag :type="getPriorityType(request.priority)" size="large">
-                {{ getPriorityText(request.priority) }}优先级
+                {{ getPriorityText(request.priority) }} Priority
               </el-tag>
               <el-tag :type="getStatusType(request.status)" size="large">
                 {{ getStatusText(request.status) }}
               </el-tag>
-              <el-button 
-                v-if="request.status === 'pending'"
-                type="primary" 
-                size="small"
-                :icon="Edit"
-                @click="openDialog(request)"
-                style="margin-left: auto"
-              >
-                编辑
+              <el-button v-if="request.status === 'pending'" type="primary" size="small" :icon="Edit"
+                @click="openDialog(request)" style="margin-left: auto">
+                Edit
               </el-button>
             </div>
 
             <el-descriptions :column="2" border style="margin-top: 15px">
-              <el-descriptions-item label="问题类型">
+              <el-descriptions-item label="Issue Type">
                 {{ request.issue_type }}
               </el-descriptions-item>
-              <el-descriptions-item label="提交时间">
+              <el-descriptions-item label="Submitted At">
                 {{ formatDateTime(request.created_at) }}
               </el-descriptions-item>
-              <el-descriptions-item label="问题描述" :span="2">
+              <el-descriptions-item label="Description" :span="2">
                 {{ request.description }}
               </el-descriptions-item>
-              <el-descriptions-item label="更新时间">
+              <el-descriptions-item label="Updated At">
                 {{ formatDateTime(request.updated_at) }}
               </el-descriptions-item>
-              <el-descriptions-item label="完成时间" v-if="request.completed_at">
+              <el-descriptions-item label="Completed At" v-if="request.completed_at">
                 {{ formatDateTime(request.completed_at) }}
               </el-descriptions-item>
-              <el-descriptions-item label="管理员备注" :span="2" v-if="request.admin_comment">
+              <el-descriptions-item label="Admin Comment" :span="2" v-if="request.admin_comment">
                 <el-alert :title="request.admin_comment" type="info" :closable="false" />
               </el-descriptions-item>
             </el-descriptions>
@@ -70,58 +56,44 @@
         </el-timeline-item>
       </el-timeline>
 
-      <el-empty v-if="requests.length === 0 && !loading" description="暂无维修申请" />
+      <el-empty v-if="requests.length === 0 && !loading" description="No maintenance requests" />
     </el-card>
 
     <!-- 新建/编辑申请对话框 -->
-    <el-dialog 
-      v-model="dialogVisible" 
-      :title="isEdit ? '编辑维修申请' : '新建维修申请'" 
-      width="500px"
-      :close-on-click-modal="false"
-    >
-      <el-form 
-        :model="form" 
-        :rules="rules" 
-        ref="formRef" 
-        label-width="100px"
-      >
-        <el-form-item label="问题类型" prop="issue_type">
-          <el-select v-model="form.issue_type" placeholder="请选择问题类型" style="width: 100%">
-            <el-option label="水电问题" value="水电" />
-            <el-option label="家具问题" value="家具" />
-            <el-option label="网络问题" value="网络" />
-            <el-option label="其他问题" value="其他" />
+    <el-dialog v-model="dialogVisible" :title="isEdit ? 'Edit Maintenance Request' : 'New Maintenance Request'"
+      width="500px" :close-on-click-modal="false">
+      <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
+        <el-form-item label="Issue Type" prop="issue_type">
+          <el-select v-model="form.issue_type" placeholder="Please select issue type" style="width: 100%">
+            <el-option label="Plumbing/Electrical" value="水电" />
+            <el-option label="Furniture" value="家具" />
+            <el-option label="Network" value="网络" />
+            <el-option label="Other" value="其他" />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="问题描述" prop="description">
-          <el-input 
-            v-model="form.description" 
-            type="textarea" 
-            :rows="5"
-            placeholder="请详细描述需要维修的问题(10-500字)"
-            maxlength="500"
-            show-word-limit
-          />
+        <el-form-item label="Description" prop="description">
+          <el-input v-model="form.description" type="textarea" :rows="5"
+            placeholder="Please describe the issue in detail (10-500 chars)" maxlength="500" show-word-limit />
         </el-form-item>
 
-        <el-form-item label="优先级" prop="priority">
+        <el-form-item label="Priority" prop="priority">
           <el-radio-group v-model="form.priority">
-            <el-radio label="high">高优先级</el-radio>
-            <el-radio label="medium">中优先级</el-radio>
-            <el-radio label="low">低优先级</el-radio>
+            <el-radio label="high">High Priority</el-radio>
+            <el-radio label="medium">Medium Priority</el-radio>
+            <el-radio label="low">Low Priority</el-radio>
           </el-radio-group>
           <div style="color: #909399; font-size: 12px; margin-top: 4px">
-            高: 紧急问题(如漏水、断电); 中: 一般问题(如灯泡坏); 低: 可延后问题
+            High: urgent issues (e.g., leak, power outage); Medium: normal issues (e.g., broken bulb); Low: can be
+            deferred
           </div>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button @click="dialogVisible = false">Cancel</el-button>
         <el-button type="primary" @click="handleSubmit" :loading="submitting">
-          {{ isEdit ? '保存修改' : '提交申请' }}
+          {{ isEdit ? 'Save Changes' : 'Submit Request' }}
         </el-button>
       </template>
     </el-dialog>
@@ -150,14 +122,14 @@ const form = reactive({
 
 const rules = {
   issue_type: [
-    { required: true, message: '请选择问题类型', trigger: 'change' }
+    { required: true, message: 'Please select issue type', trigger: 'change' }
   ],
   description: [
-    { required: true, message: '请输入问题描述', trigger: 'blur' },
-    { min: 10, max: 500, message: '描述长度在10-500字之间', trigger: 'blur' }
+    { required: true, message: 'Please enter issue description', trigger: 'blur' },
+    { min: 10, max: 500, message: 'Description length must be between 10 and 500 characters', trigger: 'blur' }
   ],
   priority: [
-    { required: true, message: '请选择优先级', trigger: 'change' }
+    { required: true, message: 'Please select priority', trigger: 'change' }
   ]
 }
 
@@ -171,7 +143,7 @@ const loadRequests = async () => {
     const data = await getMaintenanceRequests()
     requests.value = data
   } catch (error) {
-    console.error('加载维修申请失败:', error)
+    console.error('Failed to load maintenance requests:', error)
   } finally {
     loading.value = false
   }
@@ -201,17 +173,17 @@ const handleSubmit = async () => {
 
     if (isEdit.value) {
       await updateMaintenanceRequest(currentRequestId.value, form)
-      ElMessage.success('维修申请更新成功')
+      ElMessage.success('Maintenance request updated successfully')
     } else {
       await createMaintenanceRequest(form)
-      ElMessage.success('维修申请提交成功')
+      ElMessage.success('Maintenance request submitted successfully')
     }
 
     dialogVisible.value = false
     await loadRequests()
   } catch (error) {
     if (error !== false) {
-      console.error('操作失败:', error)
+      console.error('Operation failed:', error)
     }
   } finally {
     submitting.value = false
@@ -229,9 +201,9 @@ const getPriorityType = (priority) => {
 
 const getPriorityText = (priority) => {
   const textMap = {
-    'high': '高',
-    'medium': '中',
-    'low': '低'
+    'high': 'High',
+    'medium': 'Medium',
+    'low': 'Low'
   }
   return textMap[priority] || priority
 }
@@ -248,10 +220,10 @@ const getStatusType = (status) => {
 
 const getStatusText = (status) => {
   const textMap = {
-    'pending': '待处理',
-    'in_progress': '处理中',
-    'completed': '已完成',
-    'cancelled': '已取消'
+    'pending': 'Pending',
+    'in_progress': 'In Progress',
+    'completed': 'Completed',
+    'cancelled': 'Cancelled'
   }
   return textMap[status] || status
 }
@@ -278,7 +250,7 @@ const getStatusIcon = (status) => {
 
 const formatDateTime = (dateStr) => {
   if (!dateStr) return '-'
-  return new Date(dateStr).toLocaleString('zh-CN')
+  return new Date(dateStr).toLocaleString('en-US')
 }
 </script>
 

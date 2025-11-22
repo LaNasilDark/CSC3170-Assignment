@@ -10,9 +10,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1. 管理员数据
 -- ============================================================================
 INSERT INTO administrators (username, password, name, email, role, phone, is_active) VALUES
-    ('admin', 'admin123', '系统管理员', 'admin@cuhk.edu.cn', 'super_admin', '0755-88888888', 1),
-    ('dorm_manager', 'manager123', '宿舍管理员', 'dorm.manager@cuhk.edu.cn', 'admin', '0755-88888889', 1),
-    ('maintenance', 'maint123', '维修人员', 'maintenance@cuhk.edu.cn', 'maintenance_staff', '0755-88888890', 1);
+    ('admin', 'admin123', 'SystemAdmin', 'admin@cuhk.edu.cn', 'super_admin', '0755-88888888', 1),
+    ('dorm_manager', 'manager123', 'Dorm_manager', 'dorm.manager@cuhk.edu.cn', 'admin', '0755-88888889', 1),
+    ('maintenance', 'maint123', 'Maintenance', 'maintenance@cuhk.edu.cn', 'maintenance_staff', '0755-88888890', 1);
 
 -- ============================================================================
 -- 2. 宿舍数据 (1350间宿舍)

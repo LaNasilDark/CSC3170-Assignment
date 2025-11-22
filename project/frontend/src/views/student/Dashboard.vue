@@ -3,8 +3,10 @@
     <el-row :gutter="20" style="margin-bottom: 20px">
       <el-col :span="24">
         <h2 style="margin: 0 0 20px 0">
-          <el-icon style="vertical-align: middle"><Sunny /></el-icon>
-          欢迎回来, {{ profile.name || '同学' }}!
+          <el-icon style="vertical-align: middle">
+            <Sunny />
+          </el-icon>
+          Welcome back, {{ profile.name || 'Student' }}!
         </h2>
       </el-col>
     </el-row>
@@ -16,34 +18,31 @@
         <el-card shadow="hover" class="info-card">
           <template #header>
             <div class="card-header">
-              <el-icon><User /></el-icon>
-              <span>个人信息</span>
+              <el-icon>
+                <User />
+              </el-icon>
+              <span>Personal Info</span>
             </div>
           </template>
           <div v-loading="loading.profile">
             <div class="info-item">
-              <span class="label">学号:</span>
+              <span class="label">Student ID:</span>
               <span class="value">{{ profile.student_id }}</span>
             </div>
             <div class="info-item">
-              <span class="label">姓名:</span>
+              <span class="label">Name:</span>
               <span class="value">{{ profile.name }}</span>
             </div>
             <div class="info-item">
-              <span class="label">学院:</span>
+              <span class="label">College:</span>
               <span class="value">{{ profile.college }}</span>
             </div>
             <div class="info-item">
-              <span class="label">邮箱:</span>
+              <span class="label">Email:</span>
               <span class="value">{{ profile.email }}</span>
             </div>
-            <el-button 
-              type="primary" 
-              link 
-              @click="$router.push('/student/profile')"
-              style="margin-top: 10px"
-            >
-              查看详情 →
+            <el-button type="primary" link @click="$router.push('/student/profile')" style="margin-top: 10px">
+              View Details →
             </el-button>
           </div>
         </el-card>
@@ -54,42 +53,35 @@
         <el-card shadow="hover" class="info-card">
           <template #header>
             <div class="card-header">
-              <el-icon><House /></el-icon>
-              <span>宿舍信息</span>
+              <el-icon>
+                <House />
+              </el-icon>
+              <span>Dormitory Info</span>
             </div>
           </template>
           <div v-loading="loading.dorm">
             <template v-if="dormitory.building_no">
               <div class="info-item">
-                <span class="label">楼栋:</span>
+                <span class="label">Building:</span>
                 <span class="value">{{ dormitory.building_no }}</span>
               </div>
               <div class="info-item">
-                <span class="label">房间:</span>
+                <span class="label">Room:</span>
                 <span class="value">{{ dormitory.room_no }}</span>
               </div>
               <div class="info-item">
-                <span class="label">床位:</span>
+                <span class="label">Beds:</span>
                 <span class="value">
                   {{ dormitory.occupied_beds }}/{{ dormitory.total_beds }}
-                  <el-progress 
-                    :percentage="(dormitory.occupied_beds / dormitory.total_beds * 100).toFixed(0)" 
-                    :stroke-width="6"
-                    :show-text="false"
-                    style="margin-top: 5px"
-                  />
+                  <el-progress :percentage="(dormitory.occupied_beds / dormitory.total_beds * 100).toFixed(0)"
+                    :stroke-width="6" :show-text="false" style="margin-top: 5px" />
                 </span>
               </div>
-              <el-button 
-                type="primary" 
-                link 
-                @click="$router.push('/student/dormitory')"
-                style="margin-top: 10px"
-              >
-                查看室友 →
+              <el-button type="primary" link @click="$router.push('/student/dormitory')" style="margin-top: 10px">
+                View Roommates →
               </el-button>
             </template>
-            <el-empty v-else description="暂无宿舍分配" :image-size="60" />
+            <el-empty v-else description="No dormitory assigned" :image-size="60" />
           </div>
         </el-card>
       </el-col>
@@ -99,28 +91,25 @@
         <el-card shadow="hover" class="info-card">
           <template #header>
             <div class="card-header">
-              <el-icon><Wallet /></el-icon>
-              <span>待缴账单</span>
+              <el-icon>
+                <Wallet />
+              </el-icon>
+              <span>Pending Bills</span>
             </div>
           </template>
           <div v-loading="loading.bills">
             <div class="bill-stats">
               <div class="stat-item">
-                <div class="stat-label">未支付</div>
-                <div class="stat-value">{{ unpaidCount }} 笔</div>
+                <div class="stat-label">Unpaid</div>
+                <div class="stat-value">{{ unpaidCount }} items</div>
               </div>
               <div class="stat-item">
-                <div class="stat-label">总金额</div>
+                <div class="stat-label">Total Amount</div>
                 <div class="stat-value amount">¥{{ unpaidAmount }}</div>
               </div>
             </div>
-            <el-button 
-              type="primary" 
-              link 
-              @click="$router.push('/student/bills')"
-              style="margin-top: 10px"
-            >
-              查看详情 →
+            <el-button type="primary" link @click="$router.push('/student/bills')" style="margin-top: 10px">
+              View Details →
             </el-button>
           </div>
         </el-card>
@@ -131,49 +120,31 @@
     <el-card shadow="hover">
       <template #header>
         <div class="card-header">
-          <el-icon><Operation /></el-icon>
-          <span>快速操作</span>
+          <el-icon>
+            <Operation />
+          </el-icon>
+          <span>Quick Actions</span>
         </div>
       </template>
       <el-row :gutter="20">
         <el-col :span="6">
-          <el-button 
-            type="primary" 
-            :icon="Sort" 
-            @click="$router.push('/student/dorm-change')"
-            style="width: 100%"
-          >
-            申请宿舍调换
+          <el-button type="primary" :icon="Sort" @click="$router.push('/student/dorm-change')" style="width: 100%">
+            Request Dorm Change
           </el-button>
         </el-col>
         <el-col :span="6">
-          <el-button 
-            type="warning" 
-            :icon="Tools" 
-            @click="$router.push('/student/maintenance')"
-            style="width: 100%"
-          >
-            提交维修申请
+          <el-button type="warning" :icon="Tools" @click="$router.push('/student/maintenance')" style="width: 100%">
+            Submit Maintenance Request
           </el-button>
         </el-col>
         <el-col :span="6">
-          <el-button 
-            type="success" 
-            :icon="Tickets" 
-            @click="$router.push('/student/bills')"
-            style="width: 100%"
-          >
-            查看账单
+          <el-button type="success" :icon="Tickets" @click="$router.push('/student/bills')" style="width: 100%">
+            View Bills
           </el-button>
         </el-col>
         <el-col :span="6">
-          <el-button 
-            type="info" 
-            :icon="User" 
-            @click="$router.push('/student/profile')"
-            style="width: 100%"
-          >
-            个人信息
+          <el-button type="info" :icon="User" @click="$router.push('/student/profile')" style="width: 100%">
+            Profile
           </el-button>
         </el-col>
       </el-row>
@@ -224,7 +195,7 @@ const loadProfile = async () => {
     const data = await getCurrentUser()
     Object.assign(profile, data)
   } catch (error) {
-    console.error('加载个人信息失败:', error)
+    console.error('Failed to load profile:', error)
   } finally {
     loading.profile = false
   }
@@ -236,7 +207,7 @@ const loadDormitory = async () => {
     const data = await getDormitory()
     Object.assign(dormitory, data)
   } catch (error) {
-    console.error('加载宿舍信息失败:', error)
+    console.error('Failed to load dormitory info:', error)
   } finally {
     loading.dorm = false
   }
@@ -251,7 +222,7 @@ const loadBills = async () => {
     unpaidCount.value = unpaidBills.length
     unpaidAmount.value = unpaidBills.reduce((sum, bill) => sum + parseFloat(bill.amount), 0).toFixed(2)
   } catch (error) {
-    console.error('加载账单信息失败:', error)
+    console.error('Failed to load bills info:', error)
   } finally {
     loading.bills = false
   }

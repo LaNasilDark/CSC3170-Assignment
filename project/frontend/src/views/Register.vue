@@ -3,78 +3,78 @@
     <el-card class="register-card">
       <template #header>
         <div class="card-header">
-          <h2>🎓 学生注册</h2>
-          <p>Student Registration</p>
+          <h2>🎓 Student Registration</h2>
+          <!-- <p>Student Registration</p> -->
         </div>
       </template>
       
-      <el-form :model="registerForm" :rules="rules" ref="registerFormRef" label-width="100px">
-        <el-form-item label="学号" prop="student_id">
+      <el-form :model="registerForm" :rules="rules" ref="registerFormRef" label-width="150px">
+        <el-form-item label="Student ID" prop="student_id">
           <el-input 
             v-model="registerForm.student_id" 
-            placeholder="请输入9位学号"
+            placeholder="Please enter your 9-digit Student ID"
             maxlength="9"
             clearable
           />
         </el-form-item>
         
-        <el-form-item label="密码" prop="password">
+        <el-form-item label="Password" prop="password">
           <el-input 
             v-model="registerForm.password" 
             type="password" 
-            placeholder="至少6位密码"
+            placeholder="Please enter a password with at least 6 characters"
             show-password
           />
         </el-form-item>
         
-        <el-form-item label="确认密码" prop="confirmPassword">
+        <el-form-item label=" Password Confirm" prop="confirmPassword">
           <el-input 
             v-model="registerForm.confirmPassword" 
             type="password" 
-            placeholder="再次输入密码"
+            placeholder="Please confirm your password"
             show-password
           />
         </el-form-item>
         
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="registerForm.name" placeholder="请输入姓名" clearable />
+        <el-form-item label="Name" prop="name">
+          <el-input v-model="registerForm.name" placeholder="Please enter your name" clearable />
         </el-form-item>
         
-        <el-form-item label="性别" prop="gender">
+        <el-form-item label="Gender" prop="gender">
           <el-radio-group v-model="registerForm.gender">
-            <el-radio label="男">男</el-radio>
-            <el-radio label="女">女</el-radio>
+            <el-radio label="男">Male</el-radio>
+            <el-radio label="女">Female</el-radio>
           </el-radio-group>
         </el-form-item>
         
-        <el-form-item label="国籍" prop="nationality">
-          <el-input v-model="registerForm.nationality" placeholder="请输入国籍" clearable />
+        <el-form-item label="Nationality" prop="nationality">
+          <el-input v-model="registerForm.nationality" placeholder="Please enter your nationality" clearable />
         </el-form-item>
         
-        <el-form-item label="学院" prop="college">
-          <el-select v-model="registerForm.college" placeholder="请选择学院" style="width: 100%">
-            <el-option label="理工学院 (SSE)" value="SSE" />
-            <el-option label="管理学院 (SME)" value="SME" />
-            <el-option label="医学院 (MED)" value="MED" />
-            <el-option label="人文社科学院 (HSS)" value="HSS" />
-            <el-option label="人工智能学院 (SAI)" value="SAI" />
-            <el-option label="数据科学学院 (SDS)" value="SDS" />
-            <el-option label="音乐学院 (MUS)" value="MUS" />
+        <el-form-item label="School" prop="college">
+          <el-select v-model="registerForm.college" placeholder="Please select your school" style="width: 100%">
+            <el-option label="SSE" value="SSE" />
+            <el-option label="SME" value="SME" />
+            <el-option label="MED" value="MED" />
+            <el-option label="HSS" value="HSS" />
+            <el-option label="SAI" value="SAI" />
+            <el-option label="SDS" value="SDS" />
+            <el-option label="MUS" value="MUS" />
           </el-select>
         </el-form-item>
         
-        <el-form-item label="入学年份" prop="enrollment_year">
-          <el-select v-model="registerForm.enrollment_year" placeholder="请选择入学年份" style="width: 100%">
+        <el-form-item label="Enrollment Year" prop="enrollment_year">
+          <el-select v-model="registerForm.enrollment_year" placeholder="Please select your year of enrollment" style="width: 100%">
             <el-option :label="year" :value="year" v-for="year in years" :key="year" />
           </el-select>
         </el-form-item>
         
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="registerForm.email" placeholder="example@cuhk.edu.cn" clearable />
+        <el-form-item label="Email" prop="email">
+          <el-input v-model="registerForm.email" placeholder="Please enter your email address" clearable />
         </el-form-item>
         
         <el-alert 
-          title="注册成功后将自动为您分配宿舍" 
+          title="Your dormitory will be automatically assigned upon successful registration" 
           type="info" 
           :closable="false"
           style="margin-bottom: 20px"
@@ -87,13 +87,13 @@
             @click="handleRegister"
             style="width: 100%"
           >
-            {{ loading ? '注册中...' : '注册' }}
+            {{ loading ? 'Registering...' : 'Register' }}
           </el-button>
         </el-form-item>
         
         <div class="login-link">
-          已有账号？
-          <router-link to="/login">立即登录</router-link>
+          Already have an account?
+          <router-link to="/login">Login now</router-link>
         </div>
       </el-form>
     </el-card>
@@ -122,16 +122,16 @@ const registerForm = reactive({
   email: ''
 })
 
-// 生成年份选项（最近10年）
+// Generate year options (last 10 years)
 const years = computed(() => {
   const currentYear = new Date().getFullYear()
   return Array.from({ length: 10 }, (_, i) => currentYear - i)
 })
 
-// 自定义验证规则
+// Custom validation rules
 const validateStudentId = (rule, value, callback) => {
   if (!/^\d{9}$/.test(value)) {
-    callback(new Error('学号必须是9位数字'))
+    callback(new Error('Student ID must be 9 digits'))
   } else {
     callback()
   }
@@ -139,15 +139,7 @@ const validateStudentId = (rule, value, callback) => {
 
 const validateConfirmPassword = (rule, value, callback) => {
   if (value !== registerForm.password) {
-    callback(new Error('两次输入的密码不一致'))
-  } else {
-    callback()
-  }
-}
-
-const validateEmail = (rule, value, callback) => {
-  if (!value.endsWith('@cuhk.edu.cn')) {
-    callback(new Error('必须使用学校邮箱(@cuhk.edu.cn)'))
+    callback(new Error('Passwords do not match'))
   } else {
     callback()
   }
@@ -155,37 +147,36 @@ const validateEmail = (rule, value, callback) => {
 
 const rules = {
   student_id: [
-    { required: true, message: '请输入学号', trigger: 'blur' },
+    { required: true, message: 'Please enter Student ID', trigger: 'blur' },
     { validator: validateStudentId, trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少6位', trigger: 'blur' }
+    { required: true, message: 'Please enter password', trigger: 'blur' },
+    { min: 6, message: 'Password must be at least 6 characters', trigger: 'blur' }
   ],
   confirmPassword: [
-    { required: true, message: '请再次输入密码', trigger: 'blur' },
+    { required: true, message: 'Please confirm your password', trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: 'blur' }
   ],
   name: [
-    { required: true, message: '请输入姓名', trigger: 'blur' },
-    { min: 2, message: '姓名至少2个字符', trigger: 'blur' }
+    { required: true, message: 'Please enter your name', trigger: 'blur' },
+    { min: 2, message: 'Name must be at least 2 characters', trigger: 'blur' }
   ],
   gender: [
-    { required: true, message: '请选择性别', trigger: 'change' }
+    { required: true, message: 'Please select gender', trigger: 'change' }
   ],
   nationality: [
-    { required: true, message: '请输入国籍', trigger: 'blur' }
+    { required: true, message: 'Please enter nationality', trigger: 'blur' }
   ],
   college: [
-    { required: true, message: '请选择学院', trigger: 'change' }
+    { required: true, message: 'Please select your school', trigger: 'change' }
   ],
   enrollment_year: [
-    { required: true, message: '请选择入学年份', trigger: 'change' }
+    { required: true, message: 'Please select enrollment year', trigger: 'change' }
   ],
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' },
-    { validator: validateEmail, trigger: 'blur' }
+    { required: true, message: 'Please enter email', trigger: 'blur' },
+    { type: 'email', message: 'Please enter a valid email address', trigger: 'blur' }
   ]
 }
 
@@ -194,19 +185,19 @@ const handleRegister = async () => {
     await registerFormRef.value.validate()
     loading.value = true
     
-    // 移除确认密码字段
+    // remove confirmPassword field
     const { confirmPassword, ...submitData } = registerForm
     
     const data = await register(submitData)
     
-    ElMessage.success('注册成功！已自动为您分配宿舍，请登录查看')
+    ElMessage.success('Registration successful! Your dormitory has been automatically assigned. Please log in to view.')
     
     // 跳转到登录页
     setTimeout(() => {
       router.push('/login')
     }, 1500)
   } catch (error) {
-    console.error('注册失败:', error)
+    console.error('Registration failed:', error)
   } finally {
     loading.value = false
   }

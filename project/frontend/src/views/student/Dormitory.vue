@@ -6,29 +6,31 @@
         <el-card shadow="hover">
           <template #header>
             <div class="card-header">
-              <el-icon><House /></el-icon>
-              <span>宿舍信息</span>
+              <el-icon>
+                <House />
+              </el-icon>
+              <span>Dormitory Info</span>
             </div>
           </template>
           <div v-loading="loading">
             <template v-if="dormitory.building_no">
               <div class="dorm-info">
                 <el-descriptions :column="1" border>
-                  <el-descriptions-item label="楼栋">
+                  <el-descriptions-item label="Building">
                     <el-tag type="primary">{{ dormitory.building_no }}</el-tag>
                   </el-descriptions-item>
-                  <el-descriptions-item label="楼层">
-                    {{ dormitory.floor_no }} 层
+                  <el-descriptions-item label="Floor">
+                    {{ dormitory.floor_no }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="房间号">
+                  <el-descriptions-item label="Room No">
                     {{ dormitory.room_no }}
                   </el-descriptions-item>
-                  <el-descriptions-item label="性别类型">
+                  <el-descriptions-item label="Gender Type">
                     <el-tag :type="dormitory.gender_type === '男' ? 'primary' : 'danger'">
                       {{ dormitory.gender_type }}
                     </el-tag>
                   </el-descriptions-item>
-                  <el-descriptions-item label="床位占用">
+                  <el-descriptions-item label="Bed Occupancy">
                     <div>
                       <div style="margin-bottom: 8px">
                         <span style="font-size: 18px; font-weight: 600; color: #409eff">
@@ -36,40 +38,34 @@
                         </span>
                         <span style="color: #909399"> / {{ dormitory.total_beds }} 床</span>
                       </div>
-                      <el-progress 
-                        :percentage="bedOccupancyRate" 
-                        :color="getBedProgressColor(bedOccupancyRate)"
-                        :stroke-width="12"
-                      />
+                      <el-progress :percentage="bedOccupancyRate" :color="getBedProgressColor(bedOccupancyRate)"
+                        :stroke-width="12" />
                     </div>
                   </el-descriptions-item>
-                  <el-descriptions-item label="剩余床位">
+                  <el-descriptions-item label="Available Beds">
                     <el-tag :type="availableBeds > 0 ? 'success' : 'info'">
-                      {{ availableBeds }} 个空床位
+                      {{ availableBeds }} available beds
                     </el-tag>
                   </el-descriptions-item>
                 </el-descriptions>
 
                 <!-- 床位可视化 -->
                 <div class="bed-visual" style="margin-top: 20px">
-                  <div class="bed-title">床位布局</div>
+                  <div class="bed-title">Bed Layout</div>
                   <div class="beds-container">
-                    <div 
-                      v-for="i in dormitory.total_beds" 
-                      :key="i"
-                      :class="['bed-item', i <= dormitory.occupied_beds ? 'occupied' : 'empty']"
-                    >
+                    <div v-for="i in dormitory.total_beds" :key="i"
+                      :class="['bed-item', i <= dormitory.occupied_beds ? 'occupied' : 'empty']">
                       <el-icon :size="30">
                         <CircleCheckFilled v-if="i <= dormitory.occupied_beds" />
                         <CircleClose v-else />
                       </el-icon>
-                      <div class="bed-label">{{ i <= dormitory.occupied_beds ? '已占用' : '空床位' }}</div>
+                      <div class="bed-label">{{ i <= dormitory.occupied_beds ? 'Occupied' : 'Available' }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
             </template>
-            <el-empty v-else description="暂无宿舍分配" />
+            <el-empty v-else description="No dormitory assigned" />
           </div>
         </el-card>
       </el-col>
@@ -79,8 +75,10 @@
         <el-card shadow="hover">
           <template #header>
             <div class="card-header">
-              <el-icon><User /></el-icon>
-              <span>室友列表</span>
+              <el-icon>
+                <User />
+              </el-icon>
+              <span>Roommates</span>
             </div>
           </template>
           <div v-loading="loading">
@@ -93,18 +91,18 @@
                   <div class="roommate-name">
                     {{ roommate.name }}
                     <el-tag v-if="roommate.student_id === currentStudentId" type="success" size="small">
-                      我
+                      Me
                     </el-tag>
                   </div>
                   <div class="roommate-details">
                     <el-tag size="small" effect="plain">{{ roommate.student_id }}</el-tag>
                     <el-tag size="small" type="info" effect="plain">{{ roommate.college }}</el-tag>
-                    <el-tag size="small" type="warning" effect="plain">{{ roommate.enrollment_year }}级</el-tag>
+                    <el-tag size="small" type="warning" effect="plain">Class of {{ roommate.enrollment_year }}</el-tag>
                   </div>
                 </div>
               </div>
             </template>
-            <el-empty v-else description="暂无室友" :image-size="100" />
+            <el-empty v-else description="No roommates" :image-size="100" />
           </div>
         </el-card>
       </el-col>
@@ -158,10 +156,10 @@ const loadDormitory = async () => {
       Object.assign(dormitory, data)
     }
   } catch (error) {
-    console.error('加载宿舍信息失败:', error)
+    console.error('Failed to load dormitory info:', error)
     // 如果是404错误(未分配宿舍),不显示错误提示
     if (error.response?.status !== 404) {
-      ElMessage.error('加载宿舍信息失败')
+      ElMessage.error('Failed to load dormitory info')
     }
   } finally {
     loading.value = false
@@ -173,10 +171,10 @@ const loadRoommates = async () => {
     const data = await getRoommates()
     roommates.value = data || []
   } catch (error) {
-    console.error('加载室友列表失败:', error)
+    console.error('Failed to load roommates list:', error)
     // 404错误表示未分配宿舍,不显示错误
     if (error.response?.status !== 404) {
-      ElMessage.error('加载室友列表失败')
+      ElMessage.error('Failed to load roommates list')
     }
   }
 }

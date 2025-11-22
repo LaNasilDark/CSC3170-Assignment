@@ -3,7 +3,7 @@
     <el-header class="header">
       <div class="header-left">
         <el-icon style="font-size: 24px; margin-right: 10px"><HomeFilled /></el-icon>
-        <span class="title">宿舍管理系统 - 学生端</span>
+        <span class="title">Dormitory Management System - Student Portal</span>
       </div>
       <div class="header-right">
         <el-dropdown @command="handleCommand">
@@ -14,8 +14,8 @@
           </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="profile">个人信息</el-dropdown-item>
-              <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+              <el-dropdown-item command="profile">Profile</el-dropdown-item>
+              <el-dropdown-item command="logout" divided>Logout</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -33,27 +33,27 @@
         >
           <el-menu-item index="/student/dashboard">
             <el-icon><DataLine /></el-icon>
-            <span>首页</span>
+            <span>Dashboard</span>
           </el-menu-item>
           <el-menu-item index="/student/profile">
             <el-icon><User /></el-icon>
-            <span>个人信息</span>
+            <span>Profile</span>
           </el-menu-item>
           <el-menu-item index="/student/dormitory">
             <el-icon><House /></el-icon>
-            <span>我的宿舍</span>
+            <span>My Dormitory</span>
           </el-menu-item>
           <el-menu-item index="/student/bills">
             <el-icon><Tickets /></el-icon>
-            <span>账单查询</span>
+            <span>Bills</span>
           </el-menu-item>
           <el-menu-item index="/student/dorm-change">
             <el-icon><Sort /></el-icon>
-            <span>宿舍调换</span>
+            <span>Dorm Change</span>
           </el-menu-item>
           <el-menu-item index="/student/maintenance">
             <el-icon><Tools /></el-icon>
-            <span>维修申请</span>
+            <span>Maintenance</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -78,7 +78,7 @@ import { getCurrentUser } from '@/api/auth'
 import { clearAuth } from '@/utils/auth'
 
 const router = useRouter()
-const userName = ref('学生')
+const userName = ref('Student')
 
 onMounted(async () => {
   try {
@@ -94,16 +94,16 @@ const handleCommand = async (command) => {
     router.push('/student/profile')
   } else if (command === 'logout') {
     try {
-      await ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      await ElMessageBox.confirm('Are you sure you want to log out?', 'Confirm', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       })
       clearAuth()
-      ElMessage.success('已退出登录')
+      ElMessage.success('Logged out')
       router.push('/login')
     } catch (error) {
-      // 用户取消
+      // user cancelled
     }
   }
 }

@@ -4,50 +4,50 @@
       <template #header>
         <div class="card-header">
           <el-icon><User /></el-icon>
-          <span>学生管理</span>
+          <span>Student Management</span>
         </div>
       </template>
 
       <!-- 搜索和筛选 -->
       <el-form :inline="true" :model="searchForm" class="search-form">
-        <el-form-item label="搜索">
+        <el-form-item label="Search">
           <el-input 
             v-model="searchForm.search" 
-            placeholder="请输入学号或姓名" 
+            placeholder="Enter student ID or name" 
             clearable 
             style="width: 200px"
           />
         </el-form-item>
-        <el-form-item label="性别">
+        <el-form-item label="Gender">
           <el-select 
             v-model="searchForm.gender" 
-            placeholder="请选择性别" 
+            placeholder="Select gender" 
             clearable
             style="width: 120px"
           >
-            <el-option label="男" value="男" />
-            <el-option label="女" value="女" />
+            <el-option label="Male" value="男" />
+            <el-option label="Female" value="女" />
           </el-select>
         </el-form-item>
-        <el-form-item label="学院">
+        <el-form-item label="College">
           <el-select 
             v-model="searchForm.college" 
-            placeholder="请选择学院"
+            placeholder="Select college"
             clearable
             style="width: 180px"
           >
-            <el-option label="商学院 (SME)" value="SME" />
-            <el-option label="理工学院 (SSE)" value="SSE" />
-            <el-option label="人文社科学院 (HSS)" value="HSS" />
-            <el-option label="生命与健康科学学院 (SAI)" value="SAI" />
-            <el-option label="数据科学学院 (SDS)" value="SDS" />
-            <el-option label="医学院 (MED)" value="MED" />
-            <el-option label="音乐学院 (MUS)" value="MUS" />
+            <el-option label="Business School (SME)" value="SME" />
+            <el-option label="Science & Engineering (SSE)" value="SSE" />
+            <el-option label="Humanities & Social Sciences (HSS)" value="HSS" />
+            <el-option label="Life & Health Sciences (SAI)" value="SAI" />
+            <el-option label="Data Science (SDS)" value="SDS" />
+            <el-option label="Medical School (MED)" value="MED" />
+            <el-option label="Music (MUS)" value="MUS" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+          <el-button type="primary" :icon="Search" @click="handleSearch">Search</el-button>
+          <el-button :icon="Refresh" @click="handleReset">Reset</el-button>
         </el-form-item>
       </el-form>
 
@@ -59,24 +59,24 @@
         border
         style="width: 100%; margin-top: 20px"
       >
-        <el-table-column prop="student_id" label="学号" width="120" />
-        <el-table-column prop="name" label="姓名" width="100" />
-        <el-table-column prop="gender" label="性别" width="80">
+        <el-table-column prop="student_id" label="Student ID" width="120" />
+        <el-table-column prop="name" label="Name" width="100" />
+        <el-table-column prop="gender" label="Gender" width="80">
           <template #default="{ row }">
             <el-tag :type="row.gender === '男' ? 'primary' : 'danger'" size="small">
               {{ row.gender }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="email" label="邮箱" min-width="180" />
-        <el-table-column prop="college" label="学院" width="150" />
-        <el-table-column prop="dorm_id" label="宿舍ID" width="100">
+        <el-table-column prop="email" label="Email" min-width="180" />
+        <el-table-column prop="college" label="College" width="150" />
+        <el-table-column prop="dorm_id" label="Dorm ID" width="100">
           <template #default="{ row }">
             <el-tag v-if="row.dorm_id" type="success" size="small">{{ row.dorm_id }}</el-tag>
-            <el-tag v-else type="info" size="small">未分配</el-tag>
+            <el-tag v-else type="info" size="small">Unassigned</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
+        <el-table-column label="Actions" width="180" fixed="right">
           <template #default="{ row }">
             <el-button 
               type="primary" 
@@ -84,7 +84,7 @@
               :icon="Edit"
               @click="openEditDialog(row)"
             >
-              编辑
+              Edit
             </el-button>
             <el-button 
               type="danger" 
@@ -92,7 +92,7 @@
               :icon="Delete"
               @click="handleDelete(row)"
             >
-              删除
+              Delete
             </el-button>
           </template>
         </el-table-column>
@@ -114,7 +114,7 @@
     <!-- 编辑学生对话框 -->
     <el-dialog 
       v-model="dialogVisible" 
-      title="编辑学生信息" 
+      title="Edit Student" 
       width="500px"
       :close-on-click-modal="false"
     >
@@ -124,50 +124,50 @@
         ref="formRef" 
         label-width="100px"
       >
-        <el-form-item label="学号" prop="student_id">
+        <el-form-item label="Student ID" prop="student_id">
           <el-input v-model="editForm.student_id" disabled />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="editForm.name" placeholder="请输入姓名" />
+        <el-form-item label="Name" prop="name">
+          <el-input v-model="editForm.name" placeholder="Enter name" />
         </el-form-item>
-        <el-form-item label="性别" prop="gender">
+        <el-form-item label="Gender" prop="gender">
           <el-radio-group v-model="editForm.gender">
-            <el-radio label="男">男</el-radio>
-            <el-radio label="女">女</el-radio>
+            <el-radio label="男">Male</el-radio>
+            <el-radio label="女">Female</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="editForm.email" placeholder="请输入邮箱" />
+        <el-form-item label="Email" prop="email">
+          <el-input v-model="editForm.email" placeholder="Enter email" />
         </el-form-item>
-        <el-form-item label="学院" prop="college">
+        <el-form-item label="College" prop="college">
           <el-select 
             v-model="editForm.college" 
-            placeholder="请选择学院"
+            placeholder="Select college"
             style="width: 100%"
           >
-            <el-option label="商学院 (SME)" value="SME" />
-            <el-option label="理工学院 (SSE)" value="SSE" />
-            <el-option label="人文社科学院 (HSS)" value="HSS" />
-            <el-option label="生命与健康科学学院 (SAI)" value="SAI" />
-            <el-option label="数据科学学院 (SDS)" value="SDS" />
-            <el-option label="医学院 (MED)" value="MED" />
-            <el-option label="音乐学院 (MUS)" value="MUS" />
+            <el-option label="Business School (SME)" value="SME" />
+            <el-option label="Science & Engineering (SSE)" value="SSE" />
+            <el-option label="Humanities & Social Sciences (HSS)" value="HSS" />
+            <el-option label="Life & Health Sciences (SAI)" value="SAI" />
+            <el-option label="Data Science (SDS)" value="SDS" />
+            <el-option label="Medical School (MED)" value="MED" />
+            <el-option label="Music (MUS)" value="MUS" />
           </el-select>
         </el-form-item>
-        <el-form-item label="宿舍ID" prop="dorm_id">
+        <el-form-item label="Dorm ID" prop="dorm_id">
           <el-input-number 
             v-model="editForm.dorm_id" 
             :min="0"
-            placeholder="请输入宿舍ID，0表示未分配"
+            placeholder="Enter dorm ID, 0 means unassigned"
             style="width: 100%"
           />
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button @click="dialogVisible = false">Cancel</el-button>
         <el-button type="primary" @click="handleUpdate" :loading="submitting">
-          保存修改
+          Save Changes
         </el-button>
       </template>
     </el-dialog>
@@ -207,17 +207,17 @@ const editForm = reactive({
 
 const rules = {
   name: [
-    { required: true, message: '请输入姓名', trigger: 'blur' }
+    { required: true, message: 'Please enter name', trigger: 'blur' }
   ],
   gender: [
-    { required: true, message: '请选择性别', trigger: 'change' }
+    { required: true, message: 'Please select gender', trigger: 'change' }
   ],
   email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+    { required: true, message: 'Please enter email', trigger: 'blur' },
+    { type: 'email', message: 'Please enter a valid email address', trigger: 'blur' }
   ],
   college: [
-    { required: true, message: '请输入学院', trigger: 'blur' }
+    { required: true, message: 'Please enter college', trigger: 'blur' }
   ]
 }
 
@@ -266,8 +266,8 @@ const loadStudents = async () => {
       total.value = data.length
     }
   } catch (error) {
-    console.error('加载学生列表失败:', error)
-    ElMessage.error('加载学生列表失败')
+    console.error('Failed to load students:', error)
+    ElMessage.error('Failed to load students')
   } finally {
     loading.value = false
   }
@@ -309,13 +309,13 @@ const handleUpdate = async () => {
       dorm_id: editForm.dorm_id || null
     })
 
-    ElMessage.success('学生信息更新成功')
+    ElMessage.success('Student updated successfully')
     dialogVisible.value = false
     await loadStudents()
   } catch (error) {
     if (error !== false) {
-      console.error('更新学生信息失败:', error)
-      ElMessage.error('更新学生信息失败')
+      console.error('Failed to update student:', error)
+      ElMessage.error('Failed to update student')
     }
   } finally {
     submitting.value = false
@@ -325,22 +325,22 @@ const handleUpdate = async () => {
 const handleDelete = async (student) => {
   try {
     await ElMessageBox.confirm(
-      `确定要删除学生 ${student.name} (${student.student_id}) 吗？此操作不可恢复！`,
-      '警告',
+      `Are you sure you want to delete student ${student.name} (${student.student_id})? This action cannot be undone!`,
+      'Warning',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning',
       }
     )
 
     await deleteStudent(student.student_id)
-    ElMessage.success('学生删除成功')
+    ElMessage.success('Student deleted successfully')
     await loadStudents()
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('删除学生失败:', error)
-      ElMessage.error('删除学生失败')
+      console.error('Failed to delete student:', error)
+      ElMessage.error('Failed to delete student')
     }
   }
 }

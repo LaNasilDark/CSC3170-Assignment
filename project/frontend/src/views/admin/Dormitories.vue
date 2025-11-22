@@ -4,19 +4,19 @@
       <template #header>
         <div class="card-header">
           <el-icon><House /></el-icon>
-          <span>宿舍管理</span>
+          <span>Dormitory Management</span>
         </div>
       </template>
 
       <!-- 搜索和筛选 -->
       <el-form :inline="true" :model="searchForm" class="search-form">
-        <el-form-item label="房间号">
-          <el-input v-model="searchForm.room_no" placeholder="请输入房间号" clearable />
+        <el-form-item label="Room No">
+          <el-input v-model="searchForm.room_no" placeholder="Enter room no" clearable />
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleSearch">搜索</el-button>
-          <el-button :icon="Refresh" @click="handleReset">重置</el-button>
+          <el-button type="primary" :icon="Search" @click="handleSearch">Search</el-button>
+          <el-button :icon="Refresh" @click="handleReset">Reset</el-button>
         </el-form-item>
       </el-form>
 
@@ -28,17 +28,17 @@
         border
         style="width: 100%; margin-top: 20px"
       >
-        <el-table-column prop="dorm_id" label="宿舍ID" width="100" />
-        <el-table-column prop="building_no" label="楼栋" width="100" />
-        <el-table-column prop="room_no" label="房间号" width="120" />
-        <el-table-column prop="gender_type" label="性别类型" width="100">
+        <el-table-column prop="dorm_id" label="Dorm ID" width="100" />
+        <el-table-column prop="building_no" label="Building" width="100" />
+        <el-table-column prop="room_no" label="Room No" width="120" />
+        <el-table-column prop="gender_type" label="Gender Type" width="100">
           <template #default="{ row }">
             <el-tag :type="row.gender_type === '男' ? 'primary' : 'danger'" size="small">
-              {{ row.gender_type }}生宿舍
+              {{ row.gender_type === '男' ? 'Male Dorm' : 'Female Dorm' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="床位情况" width="200">
+        <el-table-column label="Bed Occupancy" width="200">
           <template #default="{ row }">
             <el-progress 
               :percentage="Math.round((row.occupied_beds / row.total_beds) * 100)" 
@@ -48,8 +48,8 @@
             </el-progress>
           </template>
         </el-table-column>
-        <el-table-column prop="description" label="描述" min-width="150" show-overflow-tooltip />
-        <el-table-column label="操作" width="250" fixed="right">
+        <el-table-column prop="description" label="Description" min-width="150" show-overflow-tooltip />
+        <el-table-column label="Actions" width="250" fixed="right">
           <template #default="{ row }">
             <el-button 
               type="primary" 
@@ -57,7 +57,7 @@
               :icon="View"
               @click="viewResidents(row)"
             >
-              查看住宿
+              View Residents
             </el-button>
             <el-button 
               type="info" 
@@ -65,7 +65,7 @@
               :icon="View"
               @click="viewDormInfo(row)"
             >
-              查看详情
+              View Details
             </el-button>
           </template>
         </el-table-column>
@@ -85,9 +85,9 @@
     </el-card>
 
     <!-- 查看宿舍信息对话框 -->
-    <el-dialog 
+      <el-dialog 
       v-model="dialogVisible" 
-      title="宿舍详细信息" 
+      title="Dorm Details" 
       width="500px"
       :close-on-click-modal="false"
     >
@@ -97,40 +97,40 @@
         ref="formRef" 
         label-width="100px"
       >
-        <el-form-item label="宿舍ID">
+        <el-form-item label="Dorm ID">
           <el-input v-model="editForm.dorm_id" disabled />
         </el-form-item>
-        <el-form-item label="楼栋" prop="building_no">
+        <el-form-item label="Building" prop="building_no">
           <el-input v-model="editForm.building_no" disabled />
         </el-form-item>
-        <el-form-item label="房间号" prop="room_no">
+        <el-form-item label="Room No" prop="room_no">
           <el-input v-model="editForm.room_no" disabled />
         </el-form-item>
-        <el-form-item label="性别类型" prop="gender_type">
+        <el-form-item label="Gender Type" prop="gender_type">
           <el-radio-group v-model="editForm.gender_type" disabled>
-            <el-radio label="男">男生宿舍</el-radio>
-            <el-radio label="女">女生宿舍</el-radio>
+            <el-radio label="男">Male Dorm</el-radio>
+            <el-radio label="女">Female Dorm</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="总床位数" prop="total_beds">
+        <el-form-item label="Total Beds" prop="total_beds">
           <el-input-number v-model="editForm.total_beds" :min="1" :max="8" disabled />
         </el-form-item>
-        <el-form-item label="描述" prop="description">
+        <el-form-item label="Description" prop="description">
           <el-input 
             v-model="editForm.description" 
             type="textarea"
             :rows="3"
-            placeholder="描述功能暂未开放"
+            placeholder="Description feature coming soon"
             disabled
           />
           <el-text type="info" size="small" style="margin-top: 5px">
-            注: 宿舍描述功能将在后续版本开放
+            Note: Dorm description will be available in future versions
           </el-text>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">关闭</el-button>
+        <el-button @click="dialogVisible = false">Close</el-button>
         <!-- 暂时隐藏保存按钮,因为没有可编辑字段 -->
         <!-- <el-button type="primary" @click="handleUpdate" :loading="submitting">
           保存修改
@@ -139,19 +139,19 @@
     </el-dialog>
 
     <!-- 查看住宿学生对话框 -->
-    <el-dialog 
+      <el-dialog 
       v-model="residentsDialogVisible" 
-      :title="`${currentDorm.room_no} 住宿学生列表`" 
+      :title="`${currentDorm.room_no} Residents`" 
       width="600px"
     >
       <el-table :data="residents" stripe border>
-        <el-table-column prop="student_id" label="学号" width="120" />
-        <el-table-column prop="name" label="姓名" width="100" />
-        <el-table-column prop="gender" label="性别" width="80" />
-        <el-table-column prop="email" label="邮箱" min-width="180" />
-        <el-table-column prop="college" label="学院" width="120" />
+        <el-table-column prop="student_id" label="Student ID" width="120" />
+        <el-table-column prop="name" label="Name" width="100" />
+        <el-table-column prop="gender" label="Gender" width="80" />
+        <el-table-column prop="email" label="Email" min-width="180" />
+        <el-table-column prop="college" label="College" width="120" />
       </el-table>
-      <el-empty v-if="residents.length === 0" description="该宿舍暂无学生" />
+      <el-empty v-if="residents.length === 0" description="No students in this dorm" />
     </el-dialog>
   </div>
 </template>
@@ -235,8 +235,8 @@ const loadDormitories = async () => {
       total.value = 0
     }
   } catch (error) {
-    console.error('加载宿舍列表失败:', error)
-    ElMessage.error('加载宿舍列表失败')
+    console.error('Failed to load dormitories:', error)
+    ElMessage.error('Failed to load dormitories')
   } finally {
     loading.value = false
   }
@@ -276,13 +276,13 @@ const handleUpdate = async () => {
       description: editForm.description
     })
 
-    ElMessage.success('宿舍信息更新成功')
+    ElMessage.success('Dorm updated successfully')
     dialogVisible.value = false
     await loadDormitories()
   } catch (error) {
     if (error !== false) {
-      console.error('更新宿舍信息失败:', error)
-      ElMessage.error('更新宿舍信息失败')
+      console.error('Failed to update dormitory:', error)
+      ElMessage.error('Failed to update dormitory')
     }
   } finally {
     submitting.value = false
@@ -296,8 +296,8 @@ const viewResidents = async (dorm) => {
     residents.value = Array.isArray(data) ? data : []
     residentsDialogVisible.value = true
   } catch (error) {
-    console.error('加载住宿学生失败:', error)
-    ElMessage.error('加载住宿学生失败')
+    console.error('Failed to load residents:', error)
+    ElMessage.error('Failed to load residents')
   }
 }
 </script>

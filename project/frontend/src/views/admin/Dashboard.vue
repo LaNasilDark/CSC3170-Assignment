@@ -4,7 +4,7 @@
       <!-- 统计卡片 -->
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <el-statistic title="学生总数" :value="statistics.total_students">
+          <el-statistic title="Total Students" :value="statistics.total_students">
             <template #prefix>
               <el-icon color="#409EFF"><User /></el-icon>
             </template>
@@ -14,7 +14,7 @@
       
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <el-statistic title="宿舍总数" :value="statistics.total_dorms">
+          <el-statistic title="Total Dorms" :value="statistics.total_dorms">
             <template #prefix>
               <el-icon color="#67C23A"><House /></el-icon>
             </template>
@@ -24,7 +24,7 @@
       
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <el-statistic title="空床位数" :value="statistics.available_beds">
+          <el-statistic title="Available Beds" :value="statistics.available_beds">
             <template #prefix>
               <el-icon color="#E6A23C"><Position /></el-icon>
             </template>
@@ -34,7 +34,7 @@
       
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <el-statistic title="未付账单" :value="statistics.unpaid_bills">
+          <el-statistic title="Unpaid Bills" :value="statistics.unpaid_bills">
             <template #prefix>
               <el-icon color="#F56C6C"><Tickets /></el-icon>
             </template>
@@ -50,7 +50,7 @@
           <template #header>
             <div class="card-header">
               <el-icon><MessageBox /></el-icon>
-              <span>待处理宿舍调换申请</span>
+              <span>Pending Dorm Change Requests</span>
               <el-badge :value="statistics.pending_dorm_changes" class="badge" />
             </div>
           </template>
@@ -61,7 +61,7 @@
               show-icon
             >
               <template #title>
-                有 {{ statistics.pending_dorm_changes }} 个待处理的宿舍调换申请
+                There are {{ statistics.pending_dorm_changes }} pending dorm change requests
               </template>
             </el-alert>
             <el-button 
@@ -69,10 +69,10 @@
               style="margin-top: 15px; width: 100%"
               @click="$router.push('/admin/dorm-requests')"
             >
-              前往处理
+              Go to Requests
             </el-button>
           </div>
-          <el-empty v-else description="暂无待处理申请" :image-size="100" />
+          <el-empty v-else description="No pending requests" :image-size="100" />
         </el-card>
       </el-col>
 
@@ -81,7 +81,7 @@
           <template #header>
             <div class="card-header">
               <el-icon><Tools /></el-icon>
-              <span>待处理维修申请</span>
+              <span>Pending Maintenance Requests</span>
               <el-badge :value="statistics.pending_maintenance" class="badge" />
             </div>
           </template>
@@ -92,7 +92,7 @@
               show-icon
             >
               <template #title>
-                有 {{ statistics.pending_maintenance }} 个待处理的维修申请
+                There are {{ statistics.pending_maintenance }} pending maintenance requests
               </template>
             </el-alert>
             <el-button 
@@ -100,10 +100,10 @@
               style="margin-top: 15px; width: 100%"
               @click="$router.push('/admin/maintenance')"
             >
-              前往处理
+              Go to Requests
             </el-button>
           </div>
-          <el-empty v-else description="暂无待处理申请" :image-size="100" />
+          <el-empty v-else description="No pending requests" :image-size="100" />
         </el-card>
       </el-col>
     </el-row>
@@ -115,23 +115,23 @@
           <template #header>
             <div class="card-header">
               <el-icon><PieChart /></el-icon>
-              <span>学生性别分布</span>
+              <span>Student Gender Distribution</span>
             </div>
           </template>
           <div class="gender-stats">
             <div class="gender-item">
               <el-icon :size="30" color="#409EFF"><Male /></el-icon>
               <div class="gender-info">
-                <div class="gender-label">男生</div>
-                <div class="gender-value">{{ statistics.male_students || 0 }} 人</div>
+                <div class="gender-label">Male</div>
+                <div class="gender-value">{{ statistics.male_students || 0 }} students</div>
               </div>
             </div>
             <el-divider direction="vertical" style="height: 60px" />
             <div class="gender-item">
               <el-icon :size="30" color="#F56C6C"><Female /></el-icon>
               <div class="gender-info">
-                <div class="gender-label">女生</div>
-                <div class="gender-value">{{ statistics.female_students || 0 }} 人</div>
+                <div class="gender-label">Female</div>
+                <div class="gender-value">{{ statistics.female_students || 0 }} students</div>
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@
           <template #header>
             <div class="card-header">
               <el-icon><DataAnalysis /></el-icon>
-              <span>宿舍床位占用率</span>
+              <span>Dorm Occupancy Rate</span>
             </div>
           </template>
           <div style="padding: 20px 0">
@@ -154,7 +154,7 @@
               :text-inside="true"
             />
             <div style="text-align: center; margin-top: 15px; color: #606266">
-              已占用 {{ statistics.occupied_beds || 0 }} / {{ statistics.total_beds || 0 }} 个床位
+              Occupied {{ statistics.occupied_beds || 0 }} / {{ statistics.total_beds || 0 }} beds
             </div>
           </div>
         </el-card>
@@ -166,24 +166,24 @@
       <template #header>
         <div class="card-header">
           <el-icon><Operation /></el-icon>
-          <span>快捷操作</span>
+              <span>Quick Actions</span>
         </div>
       </template>
       <div class="quick-actions">
         <el-button type="primary" :icon="User" @click="$router.push('/admin/students')">
-          学生管理
+          Students
         </el-button>
         <el-button type="success" :icon="House" @click="$router.push('/admin/dormitories')">
-          宿舍管理
+          Dormitories
         </el-button>
         <el-button type="warning" :icon="MessageBox" @click="$router.push('/admin/dorm-requests')">
-          调换审批
+          Dorm Change Approvals
         </el-button>
         <el-button type="danger" :icon="Tools" @click="$router.push('/admin/maintenance')">
-          维修管理
+          Maintenance
         </el-button>
         <el-button type="info" :icon="Tickets" @click="$router.push('/admin/bills')">
-          账单管理
+          Bills
         </el-button>
       </div>
     </el-card>
@@ -232,7 +232,7 @@ const loadStatistics = async () => {
     const data = await getStatistics()
     statistics.value = data
   } catch (error) {
-    console.error('加载统计数据失败:', error)
+    console.error('Failed to load statistics:', error)
   }
 }
 </script>

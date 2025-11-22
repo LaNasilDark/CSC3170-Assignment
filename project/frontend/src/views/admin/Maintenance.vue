@@ -4,16 +4,16 @@
       <template #header>
         <div class="card-header">
           <el-icon><Tools /></el-icon>
-          <span>维修申请管理</span>
+          <span>Maintenance Requests</span>
         </div>
       </template>
 
-      <!-- 筛选 -->
+      <!-- Filters -->
       <el-radio-group v-model="statusFilter" @change="loadRequests" style="margin-bottom: 20px">
-        <el-radio-button label="all">全部</el-radio-button>
-        <el-radio-button label="pending">待处理</el-radio-button>
-        <el-radio-button label="in_progress">处理中</el-radio-button>
-        <el-radio-button label="completed">已完成</el-radio-button>
+        <el-radio-button label="all">All</el-radio-button>
+        <el-radio-button label="pending">Pending</el-radio-button>
+        <el-radio-button label="in_progress">In Progress</el-radio-button>
+        <el-radio-button label="completed">Completed</el-radio-button>
       </el-radio-group>
 
       <!-- 申请列表 -->
@@ -24,33 +24,33 @@
         border
       >
         <el-table-column prop="request_id" label="ID" width="60" />
-        <el-table-column label="学生" width="150">
+        <el-table-column label="Student" width="150">
           <template #default="{ row }">
             {{ row.student_name }} ({{ row.student_id }})
           </template>
         </el-table-column>
-        <el-table-column prop="issue_type" label="问题类型" width="100" />
-        <el-table-column prop="description" label="问题描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="priority" label="优先级" width="100">
+        <el-table-column prop="issue_type" label="Issue Type" width="100" />
+        <el-table-column prop="description" label="Description" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="priority" label="Priority" width="100">
           <template #default="{ row }">
             <el-tag :type="getPriorityType(row.priority)" size="small">
               {{ getPriorityText(row.priority) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="Status" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="created_at" label="提交时间" width="180">
+        <el-table-column prop="created_at" label="Submitted At" width="180">
           <template #default="{ row }">
             {{ formatDateTime(row.created_at) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column label="Actions" width="150" fixed="right">
           <template #default="{ row }">
             <el-button 
               type="primary" 
@@ -58,7 +58,7 @@
               :icon="Edit"
               @click="openDialog(row)"
             >
-              处理
+              Handle
             </el-button>
           </template>
         </el-table-column>
@@ -66,14 +66,14 @@
     </el-card>
 
     <!-- 处理对话框 -->
-    <el-dialog 
+      <el-dialog 
       v-model="dialogVisible" 
-      title="处理维修申请" 
+      title="Process Maintenance Request" 
       width="500px"
       :close-on-click-modal="false"
     >
       <el-form :model="form" label-width="100px">
-        <el-form-item label="申请ID">
+        <el-form-item label="Request ID">
           <el-input v-model="form.request_id" disabled />
         </el-form-item>
         <el-form-item label="问题类型">
@@ -82,27 +82,27 @@
         <el-form-item label="问题描述">
           <el-input v-model="form.description" type="textarea" :rows="3" disabled />
         </el-form-item>
-        <el-form-item label="当前状态">
+        <el-form-item label="Current Status">
           <el-select v-model="form.status" style="width: 100%">
-            <el-option label="待处理" value="pending" />
-            <el-option label="处理中" value="in_progress" />
-            <el-option label="已完成" value="completed" />
+            <el-option label="Pending" value="pending" />
+            <el-option label="In Progress" value="in_progress" />
+            <el-option label="Completed" value="completed" />
           </el-select>
         </el-form-item>
-        <el-form-item label="管理员备注">
+        <el-form-item label="Admin Comment">
           <el-input 
             v-model="form.admin_comment" 
             type="textarea"
             :rows="4"
-            placeholder="请输入处理备注"
+            placeholder="Please enter handling remarks"
           />
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button @click="dialogVisible = false">Cancel</el-button>
         <el-button type="primary" @click="handleSubmit" :loading="submitting">
-          保存
+          Save
         </el-button>
       </template>
     </el-dialog>
@@ -144,8 +144,8 @@ const loadRequests = async () => {
     const data = await getMaintenanceRequests()
     requests.value = data
   } catch (error) {
-    console.error('加载维修申请失败:', error)
-    ElMessage.error('加载维修申请失败')
+    console.error('Failed to load maintenance requests:', error)
+    ElMessage.error('Failed to load maintenance requests')
   } finally {
     loading.value = false
   }
@@ -169,12 +169,12 @@ const handleSubmit = async () => {
       status: form.value.status,
       admin_comment: form.value.admin_comment
     })
-    ElMessage.success('更新成功')
+    ElMessage.success('Update successful')
     dialogVisible.value = false
     await loadRequests()
   } catch (error) {
-    console.error('更新失败:', error)
-    ElMessage.error('更新失败')
+    console.error('Update failed:', error)
+    ElMessage.error('Update failed')
   } finally {
     submitting.value = false
   }
@@ -186,7 +186,7 @@ const getPriorityType = (priority) => {
 }
 
 const getPriorityText = (priority) => {
-  const texts = { high: '高', medium: '中', low: '低' }
+  const texts = { high: 'High', medium: 'Medium', low: 'Low' }
   return texts[priority] || priority
 }
 
@@ -196,13 +196,13 @@ const getStatusType = (status) => {
 }
 
 const getStatusText = (status) => {
-  const texts = { pending: '待处理', in_progress: '处理中', completed: '已完成' }
+  const texts = { pending: 'Pending', in_progress: 'In Progress', completed: 'Completed' }
   return texts[status] || status
 }
 
 const formatDateTime = (datetime) => {
   if (!datetime) return '-'
-  return new Date(datetime).toLocaleString('zh-CN')
+  return new Date(datetime).toLocaleString('en-US')
 }
 </script>
 
