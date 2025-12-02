@@ -317,11 +317,15 @@ cd backend
 pip install -r requirements.txt
 \end{lstlisting}
 
-\textbf{Step 2: Configure Database Connection} \\
-Edit \texttt{backend/app/database.py} to set MySQL credentials:
-\begin{lstlisting}[language=Python, basicstyle=\ttfamily\scriptsize]
-DATABASE_URL = "mysql+pymysql://root:password@localhost:3306/dormitory_management_system"
+\textbf{Step 2: Configure Environment Variables} \\
+Edit \texttt{backend/.env} file to set your MySQL credentials:
+\begin{lstlisting}[language=bash, basicstyle=\ttfamily\scriptsize]
+DATABASE_URL=mysql+pymysql://root:YOUR_PASSWORD@localhost:3306/dormitory_management_system
+SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
 \end{lstlisting}
+Replace \texttt{YOUR\_PASSWORD} with your MySQL root password.
 
 \textbf{Step 3: Start Backend Server}
 \begin{lstlisting}[language=bash, basicstyle=\ttfamily\scriptsize]

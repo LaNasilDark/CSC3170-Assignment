@@ -47,7 +47,7 @@
             label-width="100px"
             style="max-width: 600px; margin-top: 20px"
           >
-            <el-form-item label="当前密码" prop="old_password">
+            <el-form-item label="Current Password" prop="old_password">
               <el-input 
                 v-model="passwordForm.old_password" 
                 type="password" 
@@ -55,7 +55,7 @@
                 show-password
               />
             </el-form-item>
-            <el-form-item label="新密码" prop="new_password">
+            <el-form-item label="New Password" prop="new_password">
               <el-input 
                 v-model="passwordForm.new_password" 
                 type="password" 
@@ -63,7 +63,7 @@
                 show-password
               />
             </el-form-item>
-            <el-form-item label="确认密码" prop="confirm_password">
+            <el-form-item label="Confirm Password" prop="confirm_password">
               <el-input 
                 v-model="passwordForm.confirm_password" 
                 type="password" 
